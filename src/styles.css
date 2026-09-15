@@ -1,0 +1,1217 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Satoshi", ui-sans-serif, system-ui, sans-serif;
+
+  /* ─────────────────────────────────────────────────────────────
+     Radius
+     ───────────────────────────────────────────────────────────── */
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 6px);
+  --radius-2xl: calc(var(--radius) + 14px);
+  --radius-3xl: calc(var(--radius) + 22px);
+
+  /* ─────────────────────────────────────────────────────────────
+     Core Theme
+     ───────────────────────────────────────────────────────────── */
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* ─────────────────────────────────────────────────────────────
+     EXISTING AM ENTERPRISES CLASSES
+     
+     IMPORTANT:
+     Keep these names exactly the same.
+     Only their colors have been updated.
+     ───────────────────────────────────────────────────────────── */
+
+  --color-cream: var(--cream);
+  --color-sand: var(--sand);
+  --color-espresso: var(--espresso);
+  --color-cocoa: var(--cocoa);
+  --color-copper: var(--copper);
+
+  /* Additional internal color */
+  --color-ice-blue: var(--ice-blue);
+  --color-body-text: var(--body-text);
+  --color-glow: var(--glow);
+
+  /* ─────────────────────────────────────────────────────────────
+     Shadows
+     ───────────────────────────────────────────────────────────── */
+
+  --shadow-luxury:
+    0 30px 60px -20px rgba(18, 52, 77, 0.14);
+
+  --shadow-soft:
+    0 8px 28px -10px rgba(18, 52, 77, 0.09);
+}
+
+
+/* ================================================================
+   ROOT — EXACT NEW BRAND PALETTE
+   ================================================================ */
+
+:root {
+  --radius: 1rem;
+
+  /* ─────────────────────────────────────────────────────────────
+     Brand Palette
+     ───────────────────────────────────────────────────────────── */
+
+  /* White */
+  --cream: #FFFFFF;
+
+  /* Very Light Blue */
+  --sand: #EAF7FF;
+
+  /* Extra light blue helper */
+  --ice-blue: #EAF7FF;
+
+  /* Deep Text / Navy */
+  --espresso: #12344D;
+
+  /* Brand Blue */
+  --cocoa: #4BAFE8;
+
+  /* Soft Blue */
+  --copper: #BDE7FF;
+
+  /* Comfortable body text */
+  --body-text: #4B6475;
+
+  /* Accent glow */
+  --glow: #20BFEA;
+
+
+  /* ─────────────────────────────────────────────────────────────
+     Radix / Shadcn Compatibility
+     ───────────────────────────────────────────────────────────── */
+
+  --background: #FFFFFF;
+  --foreground: #12344D;
+
+  --card: #FFFFFF;
+  --card-foreground: #12344D;
+
+  --popover: #FFFFFF;
+  --popover-foreground: #12344D;
+
+  /* Primary = Brand Blue */
+  --primary: #4BAFE8;
+  --primary-foreground: #FFFFFF;
+
+  /* Secondary = Very Light Blue */
+  --secondary: #EAF7FF;
+  --secondary-foreground: #12344D;
+
+  /* Muted */
+  --muted: #EAF7FF;
+  --muted-foreground: #4B6475;
+
+  /* Accent = Cyan */
+  --accent: #20BFEA;
+  --accent-foreground: #FFFFFF;
+
+  /* Destructive */
+  --destructive: #D94A4A;
+  --destructive-foreground: #FFFFFF;
+
+  /* Exact border requested */
+  --border: #D8EAF3;
+  --input: #D8EAF3;
+
+  /* Focus ring */
+  --ring: #20BFEA;
+
+  --prism-edge: color-mix(in oklab, var(--cocoa) 42%, var(--copper));
+  --prism-shadow: 0 30px 70px -28px color-mix(in oklab, var(--cocoa) 35%, transparent);
+}
+
+
+/* ================================================================
+   BASE
+   ================================================================ */
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    font-family: var(--font-sans);
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    background: var(--color-background);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--body-text);
+    font-family: var(--font-sans);
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+    color: var(--espresso);
+  }
+
+  ::selection {
+    background: var(--cocoa);
+    color: #FFFFFF;
+  }
+
+  a {
+    text-decoration: none;
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+.subpage-header-grid {
+  opacity: 0.32;
+  background-image:
+    linear-gradient(to right, color-mix(in oklab, var(--cocoa) 12%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--cocoa) 12%, transparent) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(to bottom, black, transparent 88%);
+}
+
+.prism-scene {
+  position: relative;
+  min-height: 520px;
+  display: grid;
+  place-items: center;
+  perspective: 1600px;
+  isolation: isolate;
+}
+
+.prism-grid {
+  position: absolute;
+  inset: 10% -4%;
+  border-radius: 2rem;
+  opacity: 0.5;
+  background-image: radial-gradient(circle, color-mix(in oklab, var(--cocoa) 28%, transparent) 1px, transparent 1.5px);
+  background-size: 22px 22px;
+  mask-image: radial-gradient(circle, black, transparent 72%);
+}
+
+.prism-glow {
+  position: absolute;
+  width: 70%;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--cocoa) 14%, transparent);
+  filter: blur(48px);
+}
+
+.prism-plane {
+  border: 1px solid color-mix(in oklab, white 78%, var(--cocoa));
+  background: color-mix(in oklab, white 62%, transparent);
+  backdrop-filter: blur(22px) saturate(140%);
+  box-shadow: var(--prism-shadow);
+}
+
+.prism-plane-back {
+  position: absolute;
+  width: 16rem;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border-radius: 1.5rem;
+  transform: translate3d(-24%, -10%, -70px) rotateY(-20deg) rotateX(10deg);
+  animation: prismBackFloat 8s ease-in-out infinite;
+}
+
+.prism-loader {
+  width: 4.25rem;
+  height: 4.25rem;
+  border-radius: 999px;
+  border: 2px solid color-mix(in oklab, var(--cocoa) 18%, transparent);
+  border-top-color: var(--cocoa);
+  animation: serviceOrbit 8s linear infinite;
+}
+
+.prism-micro-label {
+  position: absolute;
+  bottom: 1rem;
+  max-width: 85%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.625rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--cocoa);
+}
+
+.prism-plane-main {
+  position: relative;
+  z-index: 2;
+  width: min(82%, 22rem);
+  padding: 1.5rem;
+  border-radius: 2.25rem;
+  transform: rotateY(-10deg) rotateX(3deg);
+  animation: prismMainFloat 7s ease-in-out infinite;
+}
+
+.prism-plane-main::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(135deg, var(--copper), var(--prism-edge), transparent 70%);
+  opacity: 0.55;
+}
+
+.prism-media {
+  position: relative;
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border: 1px solid color-mix(in oklab, var(--cocoa) 18%, transparent);
+  border-radius: 1.25rem;
+  background: color-mix(in oklab, var(--sand) 64%, white);
+}
+
+.prism-icon-wrap {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  width: 4.5rem;
+  height: 4.5rem;
+  place-items: center;
+  border-radius: 1.25rem;
+  border: 1px solid white;
+  background: color-mix(in oklab, white 82%, transparent);
+  box-shadow: 0 14px 34px -18px var(--cocoa);
+}
+
+.prism-ring {
+  position: absolute;
+  border: 1px solid color-mix(in oklab, var(--cocoa) 24%, transparent);
+  border-radius: 999px;
+}
+.prism-ring-one { width: 9rem; height: 9rem; animation: serviceOrbit 16s linear infinite; }
+.prism-ring-two { width: 12rem; height: 12rem; border-style: dashed; animation: serviceOrbitReverse 22s linear infinite; }
+
+.prism-control {
+  position: absolute;
+  z-index: 4;
+  right: 2%;
+  bottom: 8%;
+  width: 13.5rem;
+  padding: 1.25rem;
+  border: 1px solid white;
+  border-radius: 1rem;
+  background: color-mix(in oklab, white 78%, transparent);
+  backdrop-filter: blur(24px) saturate(150%);
+  box-shadow: 18px 22px 50px -24px color-mix(in oklab, var(--espresso) 30%, transparent);
+  animation: prismControlFloat 6s ease-in-out infinite;
+}
+
+.prism-float-mark {
+  position: absolute;
+  z-index: 5;
+  left: 10%;
+  top: 18%;
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border: 1px solid white;
+  border-radius: 0.875rem;
+  color: var(--primary);
+  background: color-mix(in oklab, white 82%, transparent);
+  box-shadow: var(--shadow-soft);
+  animation: serviceFloat 4s ease-in-out infinite;
+}
+
+@keyframes prismBackFloat {
+  0%, 100% { transform: translate3d(-24%, -10%, -70px) rotateY(-20deg) rotateX(10deg); }
+  50% { transform: translate3d(-24%, -14%, -70px) rotateY(-17deg) rotateX(8deg); }
+}
+
+@keyframes prismMainFloat {
+  0%, 100% { transform: translateY(0) rotateY(-10deg) rotateX(3deg); }
+  50% { transform: translateY(-8px) rotateY(-8deg) rotateX(2deg); }
+}
+
+@keyframes prismControlFloat {
+  0%, 100% { transform: translate3d(0, 0, 60px); }
+  50% { transform: translate3d(0, -8px, 70px); }
+}
+
+@media (max-width: 767px) {
+  .subpage-header-grid { background-size: 38px 38px; }
+  .prism-scene { min-height: 400px; }
+  .prism-plane-back { width: 12.5rem; transform: translate3d(-18%, -8%, -70px) rotateY(-16deg) rotateX(8deg); }
+  .prism-plane-main { width: min(78%, 19rem); padding: 1rem; border-radius: 1.6rem; }
+  .prism-control { right: 1%; bottom: 5%; width: 11.5rem; padding: 1rem; }
+  .prism-float-mark { left: 3%; top: 18%; }
+}
+
+
+/* ================================================================
+   SCALE
+   ================================================================ */
+
+.scale-108 {
+  transform: scale(1.08);
+}
+
+
+/* ================================================================
+   SCROLL PROGRESS
+   ================================================================ */
+
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+
+  height: 2px;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--cocoa),
+      var(--glow),
+      var(--copper)
+    );
+
+  z-index: 100;
+
+  transition: width 0.1s linear;
+}
+
+
+/* ================================================================
+   SAFE AREA
+   ================================================================ */
+
+.safe-bottom {
+  padding-bottom: env(
+    safe-area-inset-bottom,
+    0px
+  );
+}
+
+
+/* ================================================================
+   REVEAL
+   ================================================================ */
+
+.is-visible {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+
+/* ================================================================
+   MARQUEE
+   ================================================================ */
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marqueeReverse {
+  from {
+    transform: translateX(-50%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+.marquee-track {
+  animation:
+    marquee
+    32s
+    linear
+    infinite;
+}
+
+.marquee-track-reverse {
+  animation:
+    marqueeReverse
+    36s
+    linear
+    infinite;
+}
+
+.marquee-mask {
+  mask-image:
+    linear-gradient(
+      to right,
+      transparent,
+      #000 5%,
+      #000 95%,
+      transparent
+    );
+}
+
+.marquee-pause:hover .marquee-track,
+.marquee-pause:hover .marquee-track-reverse {
+  animation-play-state: paused;
+}
+
+
+/* ================================================================
+   SLIDE IN
+   ================================================================ */
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in {
+  animation:
+    slideInUp
+    0.45s
+    ease-out;
+}
+
+
+/* ================================================================
+   SOFT CYAN PULSE
+   ================================================================ */
+
+@keyframes softPulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 0
+      rgba(32, 191, 234, 0.35);
+  }
+
+  50% {
+    box-shadow:
+      0 0 0 12px
+      rgba(32, 191, 234, 0);
+  }
+}
+
+.pulse-ring {
+  animation:
+    softPulse
+    2.2s
+    infinite;
+}
+
+
+/* ================================================================
+   CLIENTS SCROLL
+   ================================================================ */
+
+@keyframes scroll {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+
+/* ================================================================
+   LIGHT GLASS
+   ================================================================ */
+
+.glass {
+  background:
+    color-mix(
+      in oklab,
+      #FFFFFF 82%,
+      transparent
+    );
+
+  backdrop-filter:
+    blur(20px)
+    saturate(150%);
+
+  -webkit-backdrop-filter:
+    blur(20px)
+    saturate(150%);
+
+  border:
+    1px solid
+    color-mix(
+      in oklab,
+      var(--cocoa) 12%,
+      transparent
+    );
+}
+
+
+/* ================================================================
+   DARK GLASS
+   ================================================================ */
+
+.glass-dark {
+  background:
+    color-mix(
+      in oklab,
+      var(--espresso) 88%,
+      transparent
+    );
+
+  backdrop-filter:
+    blur(20px)
+    saturate(150%);
+
+  -webkit-backdrop-filter:
+    blur(20px)
+    saturate(150%);
+
+  border:
+    1px solid
+    color-mix(
+      in oklab,
+      var(--cocoa) 22%,
+      transparent
+    );
+}
+
+
+/* ================================================================
+   3D CARD SYSTEM
+   ================================================================ */
+
+.scene-3d {
+  perspective: 1100px;
+  perspective-origin: 50% 30%;
+}
+
+
+.card-3d {
+  position: relative;
+
+  transform-style: preserve-3d;
+
+  will-change: transform;
+
+  transition:
+    transform
+      0.55s
+      cubic-bezier(
+        0.22,
+        1,
+        0.36,
+        1
+      ),
+
+    box-shadow
+      0.55s
+      cubic-bezier(
+        0.22,
+        1,
+        0.36,
+        1
+      );
+
+  box-shadow:
+
+    /* Top highlight */
+    0 1px 0 0
+      color-mix(
+        in oklab,
+        #FFFFFF 70%,
+        transparent
+      )
+      inset,
+
+    /* Bottom subtle shade */
+    0 -1px 0 0
+      color-mix(
+        in oklab,
+        var(--espresso) 5%,
+        transparent
+      )
+      inset,
+
+    /* Soft shadow */
+    0 8px 18px -12px
+      color-mix(
+        in oklab,
+        var(--espresso) 18%,
+        transparent
+      ),
+
+    /* Large soft shadow */
+    0 24px 48px -28px
+      color-mix(
+        in oklab,
+        var(--espresso) 14%,
+        transparent
+      );
+}
+
+
+/* ================================================================
+   CARD LIGHT / SHINE
+   ================================================================ */
+
+.card-3d::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+
+  border-radius: inherit;
+
+  background:
+    linear-gradient(
+      145deg,
+
+      color-mix(
+        in oklab,
+        #FFFFFF 38%,
+        transparent
+      )
+      0%,
+
+      transparent 36%,
+
+      transparent 64%,
+
+      color-mix(
+        in oklab,
+        var(--cocoa) 4%,
+        transparent
+      )
+      100%
+    );
+
+  opacity: 0.8;
+
+  transition:
+    opacity
+    0.5s
+    ease;
+}
+
+
+/* Card content above shine */
+
+.card-3d > * {
+  position: relative;
+  z-index: 1;
+
+  transform:
+    translateZ(0.01px);
+}
+
+
+/* ================================================================
+   MOBILE 3D
+   ================================================================ */
+
+@media (max-width: 767px) {
+  .card-3d {
+    transform:
+      perspective(900px)
+      rotateX(2deg)
+      translateZ(0);
+  }
+
+  .card-3d:active {
+    transform:
+      perspective(900px)
+      rotateX(1deg)
+      translateY(2px)
+      scale(0.997);
+  }
+}
+
+
+/* ================================================================
+   DESKTOP 3D HOVER
+   ================================================================ */
+
+@media (min-width: 768px) and (hover: hover) {
+  .card-3d:hover {
+    transform:
+      perspective(1100px)
+      rotateX(4deg)
+      rotateY(-3deg)
+      translateY(-7px)
+      scale(1.01);
+
+    box-shadow:
+
+      0 1px 0 0
+        color-mix(
+          in oklab,
+          #FFFFFF 78%,
+          transparent
+        )
+        inset,
+
+      0 -1px 0 0
+        color-mix(
+          in oklab,
+          var(--espresso) 5%,
+          transparent
+        )
+        inset,
+
+      0 18px 32px -20px
+        color-mix(
+          in oklab,
+          var(--espresso) 24%,
+          transparent
+        ),
+
+      0 42px 68px -32px
+        color-mix(
+          in oklab,
+          var(--cocoa) 14%,
+          transparent
+        );
+  }
+
+  .card-3d:hover::before {
+    opacity: 1;
+  }
+}
+
+
+/* ================================================================
+   FLOATING PLATE ANIMATION
+   ================================================================ */
+
+@keyframes plateFloat {
+  0%,
+  100% {
+    transform:
+      rotateX(14deg)
+      rotateY(-16deg)
+      translate3d(
+        0,
+        0,
+        0
+      );
+  }
+
+  50% {
+    transform:
+      rotateX(14deg)
+      rotateY(-16deg)
+      translate3d(
+        0,
+        -12px,
+        28px
+      );
+  }
+}
+
+
+@keyframes plateFloatAlt {
+  0%,
+  100% {
+    transform:
+      rotateX(14deg)
+      rotateY(-16deg)
+      translate3d(
+        0,
+        0,
+        38px
+      );
+  }
+
+  50% {
+    transform:
+      rotateX(14deg)
+      rotateY(-16deg)
+      translate3d(
+        0,
+        -16px,
+        70px
+      );
+  }
+}
+
+
+.plate-3d {
+  transform-style: preserve-3d;
+
+  animation:
+    plateFloat
+    7s
+    ease-in-out
+    infinite;
+}
+
+
+.plate-3d-alt {
+  transform-style: preserve-3d;
+
+  animation:
+    plateFloatAlt
+    7s
+    ease-in-out
+    infinite
+    0.6s;
+}
+
+
+/* ================================================================
+   SERVICE ORBIT
+   ================================================================ */
+
+@keyframes serviceOrbit {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+@keyframes serviceOrbitReverse {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+
+@keyframes serviceFloat {
+  0%,
+  100% {
+    transform:
+      translateY(0)
+      scale(1);
+  }
+
+  50% {
+    transform:
+      translateY(-7px)
+      scale(1.03);
+  }
+}
+
+
+.service-orbit {
+  animation:
+    serviceOrbit
+    14s
+    linear
+    infinite;
+
+  border-top-color:
+    var(--cocoa);
+}
+
+
+.service-orbit-reverse {
+  animation:
+    serviceOrbitReverse
+    10s
+    linear
+    infinite;
+
+  border-bottom-color:
+    var(--cocoa);
+}
+
+
+.service-icon-float {
+  animation:
+    serviceFloat
+    3s
+    ease-in-out
+    infinite;
+}
+
+
+/* ================================================================
+   PREMIUM GLOW UTILITIES
+   ================================================================ */
+
+.blue-glow {
+  box-shadow:
+    0 0 80px
+    color-mix(
+      in oklab,
+      var(--cocoa) 18%,
+      transparent
+    );
+}
+
+
+.ice-glow {
+  box-shadow:
+    0 0 80px
+    color-mix(
+      in oklab,
+      var(--copper) 35%,
+      transparent
+    );
+}
+
+
+/* ================================================================
+   BRAND GRADIENT
+   ================================================================ */
+
+.gradient-brand {
+  background:
+    linear-gradient(
+      135deg,
+      var(--cocoa) 0%,
+      #20BFEA 55%,
+      var(--copper) 100%
+    );
+}
+
+
+/* ================================================================
+   LIGHT ICE GRADIENT
+   ================================================================ */
+
+.gradient-ice {
+  background:
+    linear-gradient(
+      135deg,
+      #FFFFFF 0%,
+      var(--sand) 48%,
+      var(--copper) 100%
+    );
+}
+
+
+/* ================================================================
+   PREMIUM DARK GRADIENT
+   ================================================================ */
+
+.gradient-dark {
+  background:
+
+    radial-gradient(
+      circle at 20% 10%,
+      rgba(75, 175, 232, 0.20),
+      transparent 38%
+    ),
+
+    radial-gradient(
+      circle at 85% 80%,
+      rgba(32, 191, 234, 0.14),
+      transparent 38%
+    ),
+
+    var(--espresso);
+}
+
+
+/* ================================================================
+   REVEAL UTILITIES
+   ================================================================ */
+
+@utility reveal {
+  opacity: 0;
+
+  transform:
+    translateY(22px);
+
+  transition:
+    opacity
+      0.75s
+      cubic-bezier(
+        0.22,
+        1,
+        0.36,
+        1
+      ),
+
+    transform
+      0.75s
+      cubic-bezier(
+        0.22,
+        1,
+        0.36,
+        1
+      );
+
+  will-change:
+    opacity,
+    transform;
+}
+
+
+@utility reveal-left {
+  opacity: 0;
+
+  transform:
+    translateX(-28px);
+
+  transition:
+    opacity
+      0.75s
+      cubic-bezier(
+        0.22,
+        1,
+        0.36,
+        1
+      ),
+
+    transform
+      0.75s
+      cubic-bezier(
+        0.22,
+        1,
+        0.36,
+        1
+      );
+}
+
+
+@utility reveal-right {
+  opacity: 0;
+
+  transform:
+    translateX(28px);
+
+  transition:
+    opacity
+      0.75s
+      cubic-bezier(
+        0.22,
+        1,
+        0.36,
+        1
+      ),
+
+    transform
+      0.75s
+      cubic-bezier(
+        0.22,
+        1,
+        0.36,
+        1
+      );
+}
+
+
+@utility reveal-zoom {
+  opacity: 0;
+
+  transform:
+    scale(0.93);
+
+  transition:
+    opacity
+      0.65s
+      ease-out,
+
+    transform
+      0.65s
+      ease-out;
+}
+
+
+/* ================================================================
+   REDUCED MOTION
+   ================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .card-3d,
+  .plate-3d,
+  .plate-3d-alt,
+  .service-orbit,
+  .service-orbit-reverse,
+  .service-icon-float,
+  .prism-plane-back,
+  .prism-plane-main,
+  .prism-control,
+  .prism-float-mark,
+  .prism-loader,
+  .prism-ring,
+  .marquee-track,
+  .marquee-track-reverse {
+    animation: none;
+    transition: none;
+  }
+
+  [data-anim="line"] {
+    transform:
+      translateY(0) !important;
+
+    opacity: 1 !important;
+
+    transition:
+      none !important;
+  }
+}
