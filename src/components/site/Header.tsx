@@ -29,7 +29,7 @@ const baseNav: NavItem[] = [
     label: "Pricing",
   },
   {
-    to: "/team",
+    to: "/directors",
     label: "Our Directors",
   },
   {
@@ -44,10 +44,11 @@ const baseNav: NavItem[] = [
     to: "/about",
     label: "About",
     children: [
-      { to: "/about",   label: "Our Company",    desc: "Who we are & why we build differently" },
-      { to: "/team",    label: "Our Directors",   desc: "Founders & Board of Directors" },
-      { to: "/blog",    label: "Tech Insights",   desc: "Articles on modern software architecture" },
-      { to: "/faq",     label: "FAQ",             desc: "Answers to common client questions" },
+      { to: "/about",     label: "Our Company",      desc: "Who we are & why we build differently" },
+      { to: "/directors", label: "Our Directors",    desc: "Founders & Board of Directors" },
+      { to: "/team",      label: "Our Team",         desc: "Engineers, architects & creators" },
+      { to: "/blog",      label: "Tech Insights",    desc: "Articles on modern software architecture" },
+      { to: "/faq",       label: "FAQ",              desc: "Answers to common client questions" },
     ],
   },
   { to: "/contact", label: "Contact" },

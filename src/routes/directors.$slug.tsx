@@ -22,7 +22,7 @@ type Member = {
   twitter_url: string | null;
 };
 
-export const Route = createFileRoute("/team/$slug")({
+export const Route = createFileRoute("/directors/$slug")({
   loader: async ({ params }) => {
     // 1. Try fetching from Supabase DB
     const dbMember = await dbSelectOne<Member>("team_members", {
@@ -79,9 +79,9 @@ export const Route = createFileRoute("/team/$slug")({
         { property: "og:title", content: title },
         { property: "og:description", content: description },
         { property: "og:type", content: "profile" },
-        { property: "og:url", content: `${SITE_URL}/team/${params.slug}` },
+        { property: "og:url", content: `${SITE_URL}/directors/${params.slug}` },
       ],
-      links: [{ rel: "canonical", href: `${SITE_URL}/team/${params.slug}` }],
+      links: [{ rel: "canonical", href: `${SITE_URL}/directors/${params.slug}` }],
     };
   },
 
@@ -89,7 +89,7 @@ export const Route = createFileRoute("/team/$slug")({
     <div className="mx-auto max-w-3xl px-6 py-24 text-center" role="alert">
       <h1 className="font-display text-2xl font-black text-espresso">Profile not found</h1>
       <p className="mt-2 text-sm text-foreground/60">{error.message}</p>
-      <Link to="/team" className="mt-6 inline-block rounded-full bg-espresso px-6 py-3 text-sm font-bold text-white">
+      <Link to="/directors" className="mt-6 inline-block rounded-full bg-espresso px-6 py-3 text-sm font-bold text-white">
         Back to Board of Directors
       </Link>
     </div>
@@ -98,7 +98,7 @@ export const Route = createFileRoute("/team/$slug")({
   notFoundComponent: () => (
     <div className="mx-auto max-w-3xl px-6 py-24 text-center">
       <h1 className="font-display text-2xl font-black text-espresso">Director Profile Not Found</h1>
-      <Link to="/team" className="mt-6 inline-block rounded-full bg-espresso px-6 py-3 text-sm font-bold text-white">
+      <Link to="/directors" className="mt-6 inline-block rounded-full bg-espresso px-6 py-3 text-sm font-bold text-white">
         Back to Board of Directors
       </Link>
     </div>
@@ -118,7 +118,7 @@ function DirectorProfilePage() {
       <section className="border-b border-espresso/10 bg-sand/30 py-12 sm:py-16">
         <div className="mx-auto max-w-5xl px-5 sm:px-6 lg:px-8">
           <Link
-            to="/team"
+            to="/directors"
             className="inline-flex items-center gap-1.5 text-xs font-bold text-espresso/60 hover:text-cocoa transition"
           >
             <ArrowLeft className="h-3.5 w-3.5" /> Back to Board of Directors

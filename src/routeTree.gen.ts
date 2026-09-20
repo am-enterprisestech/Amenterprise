@@ -19,6 +19,7 @@ import { Route as CalculatorRouteImport } from './routes/calculator'
 import { Route as CareersRouteImport } from './routes/careers'
 import { Route as ClientsRouteImport } from './routes/clients'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as DirectorsRouteImport } from './routes/directors'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -43,6 +44,8 @@ import { Route as ClientsProfileRouteImport } from './routes/clients.profile'
 import { Route as ClientsProjectsRouteImport } from './routes/clients.projects'
 import { Route as ClientsSupportRouteImport } from './routes/clients.support'
 import { Route as ClientsTasksRouteImport } from './routes/clients.tasks'
+import { Route as DirectorsIndexRouteImport } from './routes/directors.index'
+import { Route as DirectorsSlugRouteImport } from './routes/directors.$slug'
 import { Route as ServicesIndexRouteImport } from './routes/services.index'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as StaffIndexRouteImport } from './routes/staff.index'
@@ -130,6 +133,11 @@ const ClientsRoute = ClientsRouteImport.update({
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DirectorsRoute = DirectorsRouteImport.update({
+  id: '/directors',
+  path: '/directors',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FaqRoute = FaqRouteImport.update({
@@ -251,6 +259,16 @@ const ClientsTasksRoute = ClientsTasksRouteImport.update({
   id: '/tasks',
   path: '/tasks',
   getParentRoute: () => ClientsRoute,
+} as any)
+const DirectorsIndexRoute = DirectorsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DirectorsRoute,
+} as any)
+const DirectorsSlugRoute = DirectorsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => DirectorsRoute,
 } as any)
 const ServicesIndexRoute = ServicesIndexRouteImport.update({
   id: '/',
@@ -474,6 +492,7 @@ export interface FileRoutesByFullPath {
   '/careers': typeof CareersRoute
   '/clients': typeof ClientsRouteWithChildren
   '/contact': typeof ContactRoute
+  '/directors': typeof DirectorsRouteWithChildren
   '/faq': typeof FaqRoute
   '/portfolio': typeof PortfolioRoute
   '/pricing': typeof PricingRoute
@@ -496,6 +515,7 @@ export interface FileRoutesByFullPath {
   '/clients/projects': typeof ClientsProjectsRoute
   '/clients/support': typeof ClientsSupportRoute
   '/clients/tasks': typeof ClientsTasksRoute
+  '/directors/$slug': typeof DirectorsSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/staff/dashboard': typeof StaffDashboardRoute
   '/staff/documents': typeof StaffDocumentsRoute
@@ -507,6 +527,7 @@ export interface FileRoutesByFullPath {
   '/team/$slug': typeof TeamSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/clients/': typeof ClientsIndexRoute
+  '/directors/': typeof DirectorsIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/staff/': typeof StaffIndexRoute
   '/team/': typeof TeamIndexRoute
@@ -565,6 +586,7 @@ export interface FileRoutesByTo {
   '/clients/projects': typeof ClientsProjectsRoute
   '/clients/support': typeof ClientsSupportRoute
   '/clients/tasks': typeof ClientsTasksRoute
+  '/directors/$slug': typeof DirectorsSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/staff/dashboard': typeof StaffDashboardRoute
   '/staff/documents': typeof StaffDocumentsRoute
@@ -576,6 +598,7 @@ export interface FileRoutesByTo {
   '/team/$slug': typeof TeamSlugRoute
   '/blog': typeof BlogIndexRoute
   '/clients': typeof ClientsIndexRoute
+  '/directors': typeof DirectorsIndexRoute
   '/services': typeof ServicesIndexRoute
   '/staff': typeof StaffIndexRoute
   '/team': typeof TeamIndexRoute
@@ -619,6 +642,7 @@ export interface FileRoutesById {
   '/careers': typeof CareersRoute
   '/clients': typeof ClientsRouteWithChildren
   '/contact': typeof ContactRoute
+  '/directors': typeof DirectorsRouteWithChildren
   '/faq': typeof FaqRoute
   '/portfolio': typeof PortfolioRoute
   '/pricing': typeof PricingRoute
@@ -641,6 +665,7 @@ export interface FileRoutesById {
   '/clients/projects': typeof ClientsProjectsRoute
   '/clients/support': typeof ClientsSupportRoute
   '/clients/tasks': typeof ClientsTasksRoute
+  '/directors/$slug': typeof DirectorsSlugRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/staff/dashboard': typeof StaffDashboardRoute
   '/staff/documents': typeof StaffDocumentsRoute
@@ -652,6 +677,7 @@ export interface FileRoutesById {
   '/team/$slug': typeof TeamSlugRoute
   '/blog/': typeof BlogIndexRoute
   '/clients/': typeof ClientsIndexRoute
+  '/directors/': typeof DirectorsIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/staff/': typeof StaffIndexRoute
   '/team/': typeof TeamIndexRoute
@@ -695,6 +721,7 @@ export interface FileRouteTypes {
     | '/careers'
     | '/clients'
     | '/contact'
+    | '/directors'
     | '/faq'
     | '/portfolio'
     | '/pricing'
@@ -717,6 +744,7 @@ export interface FileRouteTypes {
     | '/clients/projects'
     | '/clients/support'
     | '/clients/tasks'
+    | '/directors/$slug'
     | '/services/$slug'
     | '/staff/dashboard'
     | '/staff/documents'
@@ -728,6 +756,7 @@ export interface FileRouteTypes {
     | '/team/$slug'
     | '/blog/'
     | '/clients/'
+    | '/directors/'
     | '/services/'
     | '/staff/'
     | '/team/'
@@ -786,6 +815,7 @@ export interface FileRouteTypes {
     | '/clients/projects'
     | '/clients/support'
     | '/clients/tasks'
+    | '/directors/$slug'
     | '/services/$slug'
     | '/staff/dashboard'
     | '/staff/documents'
@@ -797,6 +827,7 @@ export interface FileRouteTypes {
     | '/team/$slug'
     | '/blog'
     | '/clients'
+    | '/directors'
     | '/services'
     | '/staff'
     | '/team'
@@ -839,6 +870,7 @@ export interface FileRouteTypes {
     | '/careers'
     | '/clients'
     | '/contact'
+    | '/directors'
     | '/faq'
     | '/portfolio'
     | '/pricing'
@@ -861,6 +893,7 @@ export interface FileRouteTypes {
     | '/clients/projects'
     | '/clients/support'
     | '/clients/tasks'
+    | '/directors/$slug'
     | '/services/$slug'
     | '/staff/dashboard'
     | '/staff/documents'
@@ -872,6 +905,7 @@ export interface FileRouteTypes {
     | '/team/$slug'
     | '/blog/'
     | '/clients/'
+    | '/directors/'
     | '/services/'
     | '/staff/'
     | '/team/'
@@ -915,6 +949,7 @@ export interface RootRouteChildren {
   CareersRoute: typeof CareersRoute
   ClientsRoute: typeof ClientsRouteWithChildren
   ContactRoute: typeof ContactRoute
+  DirectorsRoute: typeof DirectorsRouteWithChildren
   FaqRoute: typeof FaqRoute
   PortfolioRoute: typeof PortfolioRoute
   PricingRoute: typeof PricingRoute
@@ -1000,6 +1035,13 @@ declare module '@tanstack/react-router' {
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/directors': {
+      id: '/directors'
+      path: '/directors'
+      fullPath: '/directors'
+      preLoaderRoute: typeof DirectorsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/faq': {
@@ -1169,6 +1211,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/clients/tasks'
       preLoaderRoute: typeof ClientsTasksRouteImport
       parentRoute: typeof ClientsRoute
+    }
+    '/directors/': {
+      id: '/directors/'
+      path: '/'
+      fullPath: '/directors/'
+      preLoaderRoute: typeof DirectorsIndexRouteImport
+      parentRoute: typeof DirectorsRoute
+    }
+    '/directors/$slug': {
+      id: '/directors/$slug'
+      path: '/$slug'
+      fullPath: '/directors/$slug'
+      preLoaderRoute: typeof DirectorsSlugRouteImport
+      parentRoute: typeof DirectorsRoute
     }
     '/services/': {
       id: '/services/'
@@ -1549,6 +1605,20 @@ const ClientsRouteChildren: ClientsRouteChildren = {
 const ClientsRouteWithChildren =
   ClientsRoute._addFileChildren(ClientsRouteChildren)
 
+interface DirectorsRouteChildren {
+  DirectorsSlugRoute: typeof DirectorsSlugRoute
+  DirectorsIndexRoute: typeof DirectorsIndexRoute
+}
+
+const DirectorsRouteChildren: DirectorsRouteChildren = {
+  DirectorsSlugRoute: DirectorsSlugRoute,
+  DirectorsIndexRoute: DirectorsIndexRoute,
+}
+
+const DirectorsRouteWithChildren = DirectorsRoute._addFileChildren(
+  DirectorsRouteChildren,
+)
+
 interface ServicesRouteChildren {
   ServicesSlugRoute: typeof ServicesSlugRoute
   ServicesIndexRoute: typeof ServicesIndexRoute
@@ -1610,6 +1680,7 @@ const rootRouteChildren: RootRouteChildren = {
   CareersRoute: CareersRoute,
   ClientsRoute: ClientsRouteWithChildren,
   ContactRoute: ContactRoute,
+  DirectorsRoute: DirectorsRouteWithChildren,
   FaqRoute: FaqRoute,
   PortfolioRoute: PortfolioRoute,
   PricingRoute: PricingRoute,
