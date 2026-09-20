@@ -58,11 +58,11 @@ export const DIRECTORS: DirectorProfile[] = [
     role_title: "Founder & Chief Executive Officer",
     short_role: "Founder & CEO",
     tagline: "Full-Stack Developer & Ecosystem Architect",
-    experience: "5+ Years Experience",
+    experience: "3+ Years Experience",
     years: 5,
     location: "Islamabad / Remote",
     badge: "Executive Leadership",
-    bio: "Founder & CEO of AM Enterprises with 5+ years of experience engineering high-performance web platforms, enterprise ERP systems, and AI-driven business workflows.",
+    bio: "Founder & CEO of AM Enterprises with 3+ years of experience engineering high-performance web platforms, enterprise ERP systems, and AI-driven business workflows.",
     long_bio: `Moez Rehman is the Founder and Chief Executive Officer of AM Enterprises. With over 5 years of hands-on engineering leadership in full-stack web development, backend infrastructure, and enterprise product architecture, Moez spearheads the company's strategic vision and technology execution.
 
 Under his leadership, AM Enterprises has transitioned from traditional web development into building integrated digital ecosystems—combining high-speed React frontends, robust Supabase databases, custom microservices, and server-side Meta Ads attribution systems.
@@ -227,7 +227,7 @@ function DirectorsPage() {
                   </div>
                   <h3 className="mt-4 font-display text-lg font-black text-espresso">Ecosystem Architecture</h3>
                   <p className="mt-1 text-xs leading-relaxed text-body-text">
-                    Led by Moez Rehman (5+ Yrs Exp). Engineering robust full-stack platforms, Vite/React apps, and Supabase database engines.
+                    Led by Moez Rehman (3+ Yrs Exp). Engineering robust full-stack platforms, Vite/React apps, and Supabase database engines.
                   </p>
                 </div>
 
@@ -275,7 +275,7 @@ function DirectorsPage() {
             {directorsList.map((director, idx) => (
               <Reveal key={director.id} delay={idx * 120}>
                 <div className="group relative flex h-full flex-col justify-between overflow-hidden rounded-3xl border border-espresso/12 bg-white p-7 shadow-soft transition-all duration-300 hover:-translate-y-2 hover:shadow-luxury">
-                  
+
                   <div>
                     {/* Header Badge */}
                     <div className="flex items-center justify-between gap-2">
@@ -307,7 +307,7 @@ function DirectorsPage() {
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-espresso/90 via-espresso/20 to-transparent opacity-80 transition duration-300 group-hover:opacity-90" />
-                      
+
                       <div className="absolute inset-x-0 bottom-0 p-5 text-white">
                         <p className="text-[11px] font-extrabold uppercase tracking-widest text-copper">
                           {director.role_title}

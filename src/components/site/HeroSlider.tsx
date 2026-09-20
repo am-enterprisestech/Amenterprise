@@ -777,10 +777,10 @@ export function HeroSlider() {
                     sm:text-lg
                   "
                 >
-                   <b>
+                  <b>
                     Need Custom Software for Your Business?
                     <br />
-                   </b>
+                  </b>
                   We build custom web apps, ERP systems and SaaS products designed around your actual business workflow.
                 </p>
               </AnimLine>
@@ -910,7 +910,7 @@ export function HeroSlider() {
                       label: "Projects Delivered",
                     },
                     {
-                      val: "5+",
+                      val: "3+",
                       label: "Years Experience",
                     },
                     {
