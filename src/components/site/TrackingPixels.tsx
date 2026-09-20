@@ -1,6 +1,8 @@
 import { useEffect, useRef } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { dbSelect } from "@/lib/rest";
+import { initAttribution } from "@/lib/attribution";
+import { initMetaPixel, trackPageView as trackMetaPageView, META_PIXEL_ID } from "@/lib/meta-analytics";
 
 export type PixelRow = {
   id: string;
@@ -86,9 +88,7 @@ function installPixel(p: PixelRow) {
     }
     case "meta_pixel": {
       if (!pid) break;
-      addScript(`${key}-fb`, {
-        code: `!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${pid}');fbq('track','PageView');`,
-      });
+      initMetaPixel(pid);
       break;
     }
     case "tiktok_pixel": {
@@ -155,12 +155,15 @@ function installPixel(p: PixelRow) {
 
 function trackPageView(pixels: PixelRow[], path: string) {
   const w = window as any;
+
+  // Always track Meta via meta-analytics engine for CAPI + deduplicated event_id
+  trackMetaPageView(path);
+
   pixels.forEach((p) => {
     const pid = (p.pixel_id ?? "").trim();
     if ((p.provider === "google_analytics" || p.provider === "google_ads") && pid && typeof w.gtag === "function") {
       w.gtag("event", "page_view", { page_path: path });
     }
-    if (p.provider === "meta_pixel" && typeof w.fbq === "function") w.fbq("track", "PageView");
     if (p.provider === "tiktok_pixel" && w.ttq?.page) w.ttq.page();
     if (p.provider === "pinterest_tag" && typeof w.pintrk === "function") w.pintrk("page");
     if (p.provider === "snapchat_pixel" && typeof w.snaptr === "function") w.snaptr("track", "PAGE_VIEW");
@@ -175,18 +178,28 @@ export function TrackingPixels() {
 
   useEffect(() => {
     let cancelled = false;
+
+    // 1. Initialize first-party attribution tracking immediately
+    initAttribution();
+
+    // 2. Ensure default Meta Pixel (1562782738404590) is loaded
+    initMetaPixel(META_PIXEL_ID);
+    trackMetaPageView(pathname);
+
     (async () => {
       const data = await dbSelect<PixelRow>("tracking_pixels", {
         select: "id, provider, pixel_id, verification_code, head_code, body_code, enabled",
         eq: { enabled: true },
         order: { column: "sort_order", ascending: true },
       });
-      if (cancelled || !data.length) return;
-      pixels.current = data as PixelRow[];
-
-      pixels.current.forEach(installPixel);
+      if (cancelled) return;
+      if (data.length) {
+        pixels.current = data as PixelRow[];
+        pixels.current.forEach(installPixel);
+      }
       ready.current = true;
     })();
+
     return () => {
       cancelled = true;
     };
@@ -194,8 +207,10 @@ export function TrackingPixels() {
 
   useEffect(() => {
     if (!ready.current || pathname === firstPath.current) return;
+    firstPath.current = pathname;
     trackPageView(pixels.current, pathname);
   }, [pathname]);
 
   return null;
 }
+

@@ -9,6 +9,7 @@ export const Route = createFileRoute("/_authenticated/admin/pricing")({
       orderBy={{ column: "sort_order", ascending: true }}
       fields={[
         { name: "name", label: "Plan name", type: "text", required: true },
+        { name: "category", label: "Category", type: "select", options: ["web", "mobile", "erp", "ai", "marketing"] },
         { name: "price", label: "Price (e.g. $1,499 / Custom)", type: "text" },
         { name: "price_period", label: "Period (/mo, /project, empty)", type: "text" },
         { name: "description", label: "Description", type: "textarea" },
@@ -21,6 +22,7 @@ export const Route = createFileRoute("/_authenticated/admin/pricing")({
       ]}
       listColumns={[
         { key: "name", label: "Plan" },
+        { key: "category", label: "Category" },
         { key: "price", label: "Price" },
         { key: "featured", label: "★", render: (r) => (r.featured ? "★" : "") },
         { key: "sort_order", label: "Order" },

@@ -225,37 +225,77 @@ function AboutPage() {
         return <TextBlock key={b.id} b={b} />;
       })}
 
-      {/* Founders strip */}
+      {/* Board of Directors strip */}
       <section className="border-y border-border bg-sand py-16">
         <div className="mx-auto max-w-[1280px] px-8">
           <Reveal>
-            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-espresso/40">
-              Leadership
-            </p>
-            <div className="mt-6 grid gap-5 sm:grid-cols-2">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-espresso/50">
+                  Board of Directors
+                </p>
+                <h3 className="font-display text-2xl font-black text-espresso mt-1">
+                  Executive Leadership & Founding Directors
+                </h3>
+              </div>
+              <Link
+                to="/team"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-cocoa hover:text-espresso"
+              >
+                View Directors Directory <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+
+            <div className="mt-8 grid gap-5 md:grid-cols-3">
               {[
                 {
                   name: "Moez Rehman",
+                  slug: "moez-rehman",
                   role: "Founder & CEO",
-                  bio: "Leads the company's vision, client strategy and business growth.",
+                  exp: "5+ Years Exp",
+                  bio: "Ecosystem Architect & Full-Stack Development Lead steering vision and enterprise delivery.",
                 },
                 {
                   name: "Ayesha Moez",
-                  role: "Co-Founder & CTO",
-                  bio: "Responsible for technical direction, engineering quality and product delivery.",
+                  slug: "ayesha-moez",
+                  role: "Co-Founder & Director of Automation",
+                  exp: "3+ Years Exp",
+                  bio: "Leads AI automation pipelines, YouTube growth engines, and automated workflow integration.",
+                },
+                {
+                  name: "Malaika Jahangir",
+                  slug: "malaika-jahangir",
+                  role: "Director of Growth & Meta Engineering",
+                  exp: "3+ Years Exp",
+                  bio: "Leads Meta Ads performance, Conversions API (CAPI) attribution, and Customer Success (CSR).",
                 },
               ].map((f, i) => (
                 <Reveal key={f.name} delay={i * 80}>
-                  <div className="flex items-start gap-4 rounded-2xl border border-border bg-white p-6">
-                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-cocoa/10 text-cocoa ring-1 ring-cocoa/20">
-                      <span className="font-display text-lg font-black">{f.name[0]}</span>
-                    </div>
+                  <Link
+                    to="/team/$slug"
+                    params={{ slug: f.slug }}
+                    className="group flex flex-col justify-between h-full rounded-2xl border border-border bg-white p-6 transition hover:-translate-y-1 hover:border-cocoa/30 hover:shadow-luxury"
+                  >
                     <div>
-                      <p className="font-display text-lg font-black text-espresso">{f.name}</p>
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-cocoa/10 text-cocoa ring-1 ring-cocoa/20 group-hover:bg-cocoa group-hover:text-white transition">
+                          <span className="font-display text-base font-black">{f.name[0]}</span>
+                        </div>
+                        <span className="rounded-full bg-sand px-2.5 py-0.5 text-[10px] font-bold text-espresso/70">
+                          {f.exp}
+                        </span>
+                      </div>
+                      <p className="mt-4 font-display text-lg font-black text-espresso group-hover:text-cocoa transition">
+                        {f.name}
+                      </p>
                       <p className="text-[10px] font-bold uppercase tracking-widest text-cocoa">{f.role}</p>
-                      <p className="mt-2 text-sm leading-relaxed text-body-text">{f.bio}</p>
+                      <p className="mt-2 text-xs leading-relaxed text-body-text">{f.bio}</p>
                     </div>
-                  </div>
+                    <div className="mt-4 pt-3 border-t border-espresso/8 flex items-center gap-1 text-xs font-bold text-cocoa group-hover:text-espresso">
+                      <span>Full Director Profile</span>
+                      <ArrowRight className="h-3 w-3" />
+                    </div>
+                  </Link>
                 </Reveal>
               ))}
             </div>

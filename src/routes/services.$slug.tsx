@@ -27,7 +27,7 @@ import { Reveal } from "@/components/site/Reveal";
 import { PrismaticVisual } from "@/components/site/PrismaticVisual";
 import { Button } from "@/components/ui/button";
 import { PHONE_PK, PHONE_PK_DISPLAY } from "@/lib/site";
-
+import { trackViewContent, trackCTAClick, trackContact } from "@/lib/meta-analytics";
 
 const iconMap: Record<string, LucideIcon> = {
   Code2,
@@ -292,6 +292,12 @@ function ServiceDetail() {
 
   const [related, setRelated] = useState<Service[]>([]);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+
+  useEffect(() => {
+    if (service?.title) {
+      trackViewContent(service.title, "Services");
+    }
+  }, [service?.title]);
 
   useEffect(() => {
     let cancelled = false;

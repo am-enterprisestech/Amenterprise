@@ -4,6 +4,9 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { CheckCircle2, Loader2, Send, Phone } from "lucide-react";
 import { useApplyPageSeo } from "@/lib/page-seo";
+import { trackLeadFormStart, trackLead, trackContact } from "@/lib/meta-analytics";
+import { getAttributionData } from "@/lib/attribution";
+import { track } from "@/lib/track";
 
 const PHONE_PK      = "+923173712950";
 const PHONE_PK_DISP = "+92 317 371 2950";
@@ -38,6 +41,10 @@ function QuotePage() {
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const handleFormInteraction = () => {
+    trackLeadFormStart("quote_form");
+  };
+
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
@@ -49,6 +56,9 @@ function QuotePage() {
       return;
     }
     setSending(true);
+
+    const attr = getAttributionData();
+
     const { error } = await supabase.from("quote_requests").insert({
       name: parsed.data.name,
       email: parsed.data.email,
@@ -59,8 +69,44 @@ function QuotePage() {
       timeline: parsed.data.timeline || null,
       message: parsed.data.message,
     });
+
+    // Also sync into unified leads CRM table for sales lifecycle tracking
+    try {
+      await supabase.from("leads").insert({
+        name: parsed.data.name,
+        email: parsed.data.email,
+        phone: parsed.data.phone || null,
+        company: parsed.data.company || null,
+        service: parsed.data.service || null,
+        notes: `Quote Request (${parsed.data.budget || "Unspecified budget"}) - ${parsed.data.message}`,
+        source: attr.utm_source || "Meta Ads / Quote Request",
+        stage: "new",
+      });
+    } catch {
+      // Ignore CRM sync errors
+    }
+
     setSending(false);
     if (error) { setError(error.message); return; }
+
+    // Fire Meta Lead standard event + CAPI + GTM dataLayer push
+    trackLead({
+      name: parsed.data.name,
+      email: parsed.data.email,
+      phone: parsed.data.phone || undefined,
+      service: parsed.data.service || undefined,
+      budget: parsed.data.budget || undefined,
+      formId: "quote_form",
+    });
+
+    track("quote_requested", {
+      name: parsed.data.name,
+      email: parsed.data.email,
+      service: parsed.data.service,
+      budget: parsed.data.budget,
+      ...attr,
+    });
+
     setDone(true);
     (e.target as HTMLFormElement).reset();
   }
@@ -74,7 +120,7 @@ function QuotePage() {
           <p className="mt-3 text-base text-body-text">We'll review your project and send a clear, itemised quote within one business day.</p>
         </div>
 
-        <form onSubmit={onSubmit} className="mt-10 rounded-3xl border border-espresso/10 bg-white p-6 shadow-soft sm:p-8">
+        <form onSubmit={onSubmit} onFocus={handleFormInteraction} className="mt-10 rounded-3xl border border-espresso/10 bg-white p-6 shadow-soft sm:p-8">
           {done && (
             <div className="mb-6 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
               <CheckCircle2 className="mt-0.5 h-5 w-5" />
@@ -102,7 +148,7 @@ function QuotePage() {
           </div>
 
           <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
-            <a href={`tel:${PHONE_PK}`} className="inline-flex items-center gap-2 text-sm font-bold text-espresso hover:text-cocoa">
+            <a href={`tel:${PHONE_PK}`} onClick={() => trackContact("phone", "quote_page_phone")} className="inline-flex items-center gap-2 text-sm font-bold text-espresso hover:text-cocoa">
               <Phone className="h-4 w-4" /> Or call {PHONE_PK_DISP}
             </a>
             <button type="submit" disabled={sending} className="inline-flex items-center gap-2 rounded-full bg-espresso px-7 py-3 text-sm font-bold text-white shadow-soft hover:bg-cocoa disabled:opacity-60">

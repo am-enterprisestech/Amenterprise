@@ -9,6 +9,9 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/site/PageHeader";
 import { Reveal } from "@/components/site/Reveal";
+import { trackLeadFormStart, trackLead, trackContact } from "@/lib/meta-analytics";
+import { getAttributionData } from "@/lib/attribution";
+import { track } from "@/lib/track";
 
 const PHONE_PK      = "+923173712950";
 const PHONE_PK_DISP = "+92 317 371 2950";
@@ -49,18 +52,21 @@ const CONTACT_INFO = [
     label: "Pakistan",
     value: PHONE_PK_DISP,
     href: `tel:${PHONE_PK}`,
+    onClick: () => trackContact("phone", "contact_page_pk"),
   },
   {
     icon: Phone,
     label: "United Kingdom",
     value: PHONE_UK_DISP,
     href: `tel:${PHONE_UK}`,
+    onClick: () => trackContact("phone", "contact_page_uk"),
   },
   {
     icon: Mail,
     label: "Email",
     value: EMAIL,
     href: `mailto:${EMAIL}`,
+    onClick: () => trackContact("email", "contact_page_email"),
   },
   {
     icon: Clock,
@@ -79,18 +85,56 @@ function ContactPage() {
     name: "", email: "", subject: "Digital Ecosystem", message: "",
   });
 
+  const handleFormInteraction = () => {
+    trackLeadFormStart("contact_form");
+  };
+
   const onSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
     setBusy(true);
+
+    const attr = getAttributionData();
+
     const { error } = await supabase.from("contact_messages").insert({
       name:    form.name.trim(),
       email:   form.email.trim(),
       subject: form.subject.trim(),
       message: form.message.trim(),
     });
+
+    // Also sync into unified leads CRM table for sales lifecycle tracking
+    try {
+      await supabase.from("leads").insert({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        service: form.subject.trim(),
+        notes: form.message.trim(),
+        source: attr.utm_source || "Meta Ads / Website",
+        stage: "new",
+      });
+    } catch {
+      // Ignore CRM sync errors
+    }
+
     setBusy(false);
     if (error) { setError(error.message); return; }
+
+    // Fire Meta Lead standard event + CAPI + GTM dataLayer push
+    trackLead({
+      name: form.name.trim(),
+      email: form.email.trim(),
+      service: form.subject.trim(),
+      formId: "contact_form",
+    });
+
+    track("contact_form_submitted", {
+      name: form.name.trim(),
+      email: form.email.trim(),
+      service: form.subject.trim(),
+      ...attr,
+    });
+
     setSent(true);
     setForm({ name: "", email: "", subject: "Digital Ecosystem", message: "" });
     setTimeout(() => setSent(false), 10000);
@@ -128,6 +172,7 @@ function ContactPage() {
                       {item.href ? (
                         <a
                           href={item.href}
+                          onClick={item.onClick}
                           className="mt-0.5 block text-sm font-semibold text-espresso transition hover:text-cocoa"
                         >
                           {item.value}
@@ -156,12 +201,14 @@ function ContactPage() {
                   href={`https://wa.me/${PHONE_PK.replace("+", "")}`}
                   target="_blank"
                   rel="noreferrer"
+                  onClick={() => trackContact("whatsapp", "contact_page_cta")}
                   className="inline-flex items-center gap-2 rounded-xl bg-[#25D366] px-4 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
                 >
                   WhatsApp us
                 </a>
                 <a
                   href={`tel:${PHONE_UK}`}
+                  onClick={() => trackContact("phone", "contact_page_uk_cta")}
                   className="inline-flex items-center gap-2 rounded-xl border border-border px-4 py-2.5 text-sm font-semibold text-espresso transition hover:bg-white"
                 >
                   Call UK office
@@ -174,6 +221,7 @@ function ContactPage() {
           <Reveal variant="right">
             <form
               onSubmit={onSubmit}
+              onFocus={handleFormInteraction}
               className="rounded-2xl border border-border bg-white p-8 shadow-soft"
             >
               <h2 className="font-display text-2xl font-black text-espresso">

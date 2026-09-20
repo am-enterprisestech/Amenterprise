@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ArrowUp, MessageCircle, Phone, Calendar, FileText } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { trackContact, trackCTAClick } from "@/lib/meta-analytics";
 
 const PHONE_PK      = "+923173712950";
 const PHONE_PK_DISP = "+92 317 371 2950";
@@ -54,6 +55,7 @@ export function MobileStickyCTA() {
       <div className="grid grid-cols-4 px-2 py-1.5">
         <a
           href={`tel:${PHONE_PK}`}
+          onClick={() => trackContact("phone", "mobile_sticky_bar")}
           className="flex flex-col items-center gap-0.5 rounded-xl px-1 py-2 text-espresso active:bg-sand"
         >
           <Phone className="h-5 w-5 text-cocoa" />
@@ -63,6 +65,7 @@ export function MobileStickyCTA() {
           href={`https://wa.me/${PHONE_PK.replace("+", "")}`}
           target="_blank"
           rel="noreferrer"
+          onClick={() => trackContact("whatsapp", "mobile_sticky_bar")}
           className="flex flex-col items-center gap-0.5 rounded-xl px-1 py-2 text-espresso active:bg-sand"
         >
           <MessageCircle className="h-5 w-5 text-cocoa" />
@@ -70,6 +73,7 @@ export function MobileStickyCTA() {
         </a>
         <Link
           to="/book"
+          onClick={() => trackCTAClick("Book Call", "mobile_sticky_bar")}
           className="flex flex-col items-center gap-0.5 rounded-xl px-1 py-2 text-espresso active:bg-sand"
         >
           <Calendar className="h-5 w-5 text-cocoa" />
@@ -77,6 +81,7 @@ export function MobileStickyCTA() {
         </Link>
         <Link
           to="/contact"
+          onClick={() => trackCTAClick("Start Project", "mobile_sticky_bar")}
           className="flex flex-col items-center gap-0.5 rounded-xl px-1 py-2 text-espresso active:bg-sand"
         >
           <FileText className="h-5 w-5 text-cocoa" />

@@ -6,7 +6,10 @@ import { runSiteAudit, type AuditResult } from "@/lib/audit.functions";
 import { dbInsert } from "@/lib/rest";
 import { useApplyPageSeo } from "@/lib/page-seo";
 import { track } from "@/lib/track";
+import { trackLeadFormStart, trackLead, trackContact } from "@/lib/meta-analytics";
+import { getAttributionData } from "@/lib/attribution";
 import { Gauge, Loader2, Search, AlertTriangle, CheckCircle2, XCircle, Phone } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const PHONE_PK      = "+923173712950";
 const PHONE_PK_DISP = "+92 317 371 2950";
@@ -38,6 +41,10 @@ function AuditPage() {
   const [result, setResult] = useState<AuditResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const handleFormInteraction = () => {
+    trackLeadFormStart("site_audit_form");
+  };
+
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(null);
@@ -50,6 +57,7 @@ function AuditPage() {
     }
     setRunning(true);
     try {
+      const attr = getAttributionData();
       const res = await audit({ data: { url: parsed.data.url } });
       setResult(res);
       if (!res.ok) setError(res.summary);
@@ -63,7 +71,30 @@ function AuditPage() {
         findings: res.findings,
         summary: res.summary,
       });
-      track("site_audit", { url: res.url, score: res.score });
+
+      // Also sync into unified leads CRM table for sales lifecycle tracking
+      try {
+        await supabase.from("leads").insert({
+          name: parsed.data.name,
+          email: parsed.data.email,
+          service: "Website Audit",
+          notes: `Audit for ${res.url} (Score: ${res.score}/100)`,
+          source: attr.utm_source || "Meta Ads / Audit Tool",
+          stage: "new",
+        });
+      } catch {
+        // Ignore CRM sync errors
+      }
+
+      // Fire Meta Lead standard event + CAPI + GTM dataLayer push
+      trackLead({
+        name: parsed.data.name,
+        email: parsed.data.email,
+        service: "Site Audit Tool",
+        formId: "site_audit_form",
+      });
+
+      track("site_audit", { url: res.url, score: res.score, ...attr });
     } catch {
       setError("The audit couldn't finish. Please try again in a moment.");
     }
@@ -88,6 +119,7 @@ function AuditPage() {
 
         <form
           onSubmit={onSubmit}
+          onFocus={handleFormInteraction}
           className="mx-auto mt-10 max-w-3xl rounded-3xl border border-espresso/10 bg-white p-6 shadow-soft sm:p-8"
         >
           {error && (
