@@ -6,7 +6,7 @@ import { FileText, Download } from "lucide-react";
 export const Route = createFileRoute("/staff/documents")({
   head: () => ({
     meta: [
-      { title: "Resources — AYMOXI Team Portal" },
+      { title: "Resources — amenterprise Team Portal" },
       { name: "description", content: "Guides, brand assets and documents shared with you by the team." },
       { name: "robots", content: "noindex, nofollow" },
     ],

@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/staff/tasks")({
   head: () => ({
     meta: [
-      { title: "My Tasks — AYMOXI Team Portal" },
+      { title: "My Tasks — amenterprise Team Portal" },
       { name: "description", content: "Every task assigned to you, with status, priority and due dates." },
       { name: "robots", content: "noindex, nofollow" },
     ],

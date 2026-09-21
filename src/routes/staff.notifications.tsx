@@ -7,7 +7,7 @@ import { Bell, CheckCheck } from "lucide-react";
 export const Route = createFileRoute("/staff/notifications")({
   head: () => ({
     meta: [
-      { title: "Notifications — AYMOXI Team Portal" },
+      { title: "Notifications — amenterprise Team Portal" },
       { name: "description", content: "All alerts and updates for your team account." },
       { name: "robots", content: "noindex, nofollow" },
     ],

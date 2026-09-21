@@ -59,7 +59,7 @@ export const Route = createFileRoute("/directors/$slug")({
       photo_url: dbMember?.photo_url || staticDirector?.photo_url || null,
       linkedin_url: dbMember?.linkedin_url || staticDirector?.linkedin_url || null,
       twitter_url: dbMember?.twitter_url || staticDirector?.twitter_url || null,
-      email: staticDirector?.email || "contact@aymoxi.com",
+      email: staticDirector?.email || "contact@amenterprise.com",
     };
 
     return { member: profile };
@@ -207,7 +207,7 @@ function DirectorProfilePage() {
       {/* DETAILED BIO & EXPERTISE SECTION */}
       <section className="py-12 sm:py-16">
         <div className="mx-auto grid max-w-5xl gap-10 px-5 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8">
-          
+
           {/* Main Content Column */}
           <div className="min-w-0 space-y-10">
             {m.long_bio && (

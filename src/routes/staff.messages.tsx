@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 export const Route = createFileRoute("/staff/messages")({
   head: () => ({
     meta: [
-      { title: "Messages — AYMOXI Team Portal" },
+      { title: "Messages — amenterprise Team Portal" },
       { name: "description", content: "Internal messages from management to your account." },
       { name: "robots", content: "noindex, nofollow" },
     ],

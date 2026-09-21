@@ -1,5 +1,5 @@
 -- =============================================================================
--- AYMOXI LLC — COMPLETE DATABASE SETUP (A to Z)
+-- amenterprise LLC — COMPLETE DATABASE SETUP (A to Z)
 -- Run this ONE file on a fresh Supabase project (SQL Editor) and everything
 -- (public website, admin panel, client portal) will work.
 --
@@ -333,7 +333,7 @@ CREATE TABLE public.client_messages (
     client_id uuid NOT NULL,
     subject text NOT NULL,
     body text NOT NULL,
-    sender text DEFAULT 'AYMOXI Team'::text NOT NULL,
+    sender text DEFAULT 'amenterprise Team'::text NOT NULL,
     important boolean DEFAULT false NOT NULL,
     is_read boolean DEFAULT false NOT NULL,
     created_at timestamp with time zone DEFAULT now() NOT NULL,

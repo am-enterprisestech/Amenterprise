@@ -12,7 +12,7 @@ interface Props {
 
 export function DeveloperPortal({ staff, tasks, onRefresh }: Props) {
   const [activeTab, setActiveTab] = useState<"tasks" | "bugs" | "deployments" | "repos">("tasks");
-  const [repoUrl, setRepoUrl] = useState("https://github.com/aymoxi/apex-tech-premier-suite");
+  const [repoUrl, setRepoUrl] = useState("https://github.com/amenterprise/apex-tech-premier-suite");
   const [bugs, setBugs] = useState([
     { id: "1", title: "Supabase Realtime disconnect on long idle", priority: "high", status: "open" },
     { id: "2", title: "Fix hydration mismatch in server function", priority: "medium", status: "resolved" },

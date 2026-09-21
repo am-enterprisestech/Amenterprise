@@ -113,7 +113,7 @@ function StaffLogin() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="ali.developer@aymoxi.com"
+                placeholder="ali.developer@amenterprise.com"
                 className="mt-1.5 w-full rounded-2xl border border-white/15 bg-slate-950 px-4 py-3 text-sm text-white placeholder-zinc-600 outline-none focus:border-emerald-400"
               />
             </div>

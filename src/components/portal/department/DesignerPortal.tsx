@@ -11,7 +11,7 @@ interface Props {
 }
 
 export function DesignerPortal({ staff, tasks, onRefresh }: Props) {
-  const [figmaUrl, setFigmaUrl] = useState("https://figma.com/@aymoxi");
+  const [figmaUrl, setFigmaUrl] = useState("https://figma.com/@amenterprise");
   const [revisions, setRevisions] = useState([
     { id: "1", project: "E-Commerce Suite", notes: "Change hero CTA color to cocoa and adjust mobile padding.", status: "in_progress" },
     { id: "2", project: "SaaS Dashboard", notes: "Add dark mode toggle mockup preview.", status: "approved" },
@@ -74,9 +74,8 @@ export function DesignerPortal({ staff, tasks, onRefresh }: Props) {
               </div>
               <button
                 onClick={() => toggleApproval(r.id)}
-                className={`rounded-full px-3 py-1 text-xs font-bold capitalize transition ${
-                  r.status === "approved" ? "bg-emerald-100 text-emerald-800" : "bg-purple-100 text-purple-800"
-                }`}
+                className={`rounded-full px-3 py-1 text-xs font-bold capitalize transition ${r.status === "approved" ? "bg-emerald-100 text-emerald-800" : "bg-purple-100 text-purple-800"
+                  }`}
               >
                 {r.status === "approved" ? "✓ Approved by Client" : "In Progress"}
               </button>

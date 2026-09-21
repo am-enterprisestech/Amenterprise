@@ -82,7 +82,7 @@ Moez works directly with business founders and enterprise decision-makers to tra
     ],
     linkedin_url: "https://linkedin.com",
     twitter_url: "https://twitter.com",
-    email: "moez@aymoxi.com",
+    email: "moez@amenterprise.com",
   },
   {
     id: "ayesha-moez",
@@ -115,7 +115,7 @@ Her systems enable clients to operate 24/7 with zero operational friction, signi
     ],
     linkedin_url: "https://linkedin.com",
     twitter_url: "https://twitter.com",
-    email: "ayesha@aymoxi.com",
+    email: "ayesha@amenterprise.com",
   },
   {
     id: "malaika-jahangir",
@@ -148,7 +148,7 @@ Malaika also oversees Customer Success & Retention (CSR), maintaining high satis
     ],
     linkedin_url: "https://linkedin.com",
     twitter_url: "https://twitter.com",
-    email: "malaika@aymoxi.com",
+    email: "malaika@amenterprise.com",
   },
 ];
 

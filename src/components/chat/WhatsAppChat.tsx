@@ -77,7 +77,7 @@ export function WhatsAppChat({ currentUser }: { currentUser: ChatUser }) {
       // Create default General Channel if empty
       const defaultChan: Channel = {
         id: crypto.randomUUID(),
-        name: "AYMOXI General Workspace",
+        name: "amenterprise General Workspace",
         type: "group",
         members: [currentUser.am_id],
       };
@@ -310,9 +310,8 @@ export function WhatsAppChat({ currentUser }: { currentUser: ChatUser }) {
                   <button
                     key={c.id}
                     onClick={() => setActiveChannel(c)}
-                    className={`flex w-full items-center gap-3 p-3.5 text-left transition ${
-                      isActive ? "bg-espresso/10 border-l-4 border-espresso" : "hover:bg-sand/60"
-                    }`}
+                    className={`flex w-full items-center gap-3 p-3.5 text-left transition ${isActive ? "bg-espresso/10 border-l-4 border-espresso" : "hover:bg-sand/60"
+                      }`}
                   >
                     <div className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-espresso/15 text-espresso">
                       {c.type === "group" || c.type === "project" ? (
@@ -389,9 +388,8 @@ export function WhatsAppChat({ currentUser }: { currentUser: ChatUser }) {
 
                       {/* Bubble */}
                       <div
-                        className={`rounded-2xl px-4 py-3 text-sm shadow-sm ${
-                          isMe ? "bg-espresso text-white rounded-br-none" : "bg-card border border-espresso/10 text-espresso rounded-bl-none"
-                        }`}
+                        className={`rounded-2xl px-4 py-3 text-sm shadow-sm ${isMe ? "bg-espresso text-white rounded-br-none" : "bg-card border border-espresso/10 text-espresso rounded-bl-none"
+                          }`}
                       >
                         <p className="whitespace-pre-wrap">{m.message}</p>
 
@@ -510,9 +508,8 @@ export function WhatsAppChat({ currentUser }: { currentUser: ChatUser }) {
                 ) : (
                   <button
                     onClick={isRecordingVoice ? stopVoiceRecording : startVoiceRecording}
-                    className={`grid h-10 w-10 shrink-0 place-items-center rounded-full text-white ${
-                      isRecordingVoice ? "bg-red-600 animate-pulse" : "bg-espresso hover:bg-cocoa"
-                    }`}
+                    className={`grid h-10 w-10 shrink-0 place-items-center rounded-full text-white ${isRecordingVoice ? "bg-red-600 animate-pulse" : "bg-espresso hover:bg-cocoa"
+                      }`}
                   >
                     <Mic className="h-4 w-4" />
                   </button>

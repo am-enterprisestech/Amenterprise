@@ -1,6 +1,6 @@
 import { dbInsert } from "@/lib/rest";
 
-const KEY = "aymoxi_sid";
+const KEY = "amenterprise_sid";
 
 function sessionId(): string {
   if (typeof window === "undefined") return "";
