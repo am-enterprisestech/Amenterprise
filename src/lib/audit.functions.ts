@@ -55,7 +55,7 @@ export const runSiteAudit = createServerFn({ method: "POST" })
       const timer = setTimeout(() => controller.abort(), 12000);
       const res = await safeFetch(parsed, {
         signal: controller.signal,
-        headers: { "user-agent": "amenterpriseSiteAudit/1.0 (+https://www.amenterprise.com)" },
+        headers: { "user-agent": "amenterpriseSiteAudit/1.0 (+https://www.amenterprise.tech)" },
       });
       clearTimeout(timer);
       status = res.status;

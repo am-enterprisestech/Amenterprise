@@ -59,7 +59,7 @@ export const Route = createFileRoute("/team/$slug")({
       photo_url: dbMember?.photo_url || staticDirector?.photo_url || null,
       linkedin_url: dbMember?.linkedin_url || staticDirector?.linkedin_url || null,
       twitter_url: dbMember?.twitter_url || staticDirector?.twitter_url || null,
-      email: staticDirector?.email || "contact@amenterprise.com",
+      email: staticDirector?.email || "contact@amenterprise.tech",
     };
 
     return { member: profile };
