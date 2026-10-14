@@ -7,7 +7,7 @@ export const Route = createFileRoute("/clients")({
   // /clients/ index child. Redirect to /clients/ so the login page is shown.
   beforeLoad: ({ location }) => {
     if (location.pathname === "/clients") {
-      throw redirect({ to: "/clients/", replace: true });
+      throw redirect({ to: "/clients/" as any, replace: true });
     }
   },
   component: () => <Outlet />,

@@ -11,6 +11,7 @@ export const Route = createFileRoute("/_authenticated/admin")({
 const nav: { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean; badge?: string }[] = [
   { to: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/admin/analytics", label: "Live Analytics", icon: Radar, badge: "live" },
+  { to: "/admin/roles", label: "Roles & RBAC", icon: ShieldCheck, badge: "rbac" },
   { to: "/admin/portal", label: "Client Portal", icon: Users },
   { to: "/admin/staff", label: "Team Portal", icon: Users },
   { to: "/admin/chat", label: "Live Chat", icon: MessageCircle, badge: "live" },

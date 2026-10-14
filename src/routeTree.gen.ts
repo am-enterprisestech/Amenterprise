@@ -23,6 +23,7 @@ import { Route as DevAuthRouteImport } from './routes/dev-auth'
 import { Route as DirectorsRouteImport } from './routes/directors'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as GdAuthRouteImport } from './routes/gd-auth'
+import { Route as ManagerRouteImport } from './routes/manager'
 import { Route as PmAuthRouteImport } from './routes/pm-auth'
 import { Route as PortfolioRouteImport } from './routes/portfolio'
 import { Route as PricingRouteImport } from './routes/pricing'
@@ -88,6 +89,7 @@ import { Route as AuthenticatedAdminPricingRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminProcessRouteImport } from './routes/_authenticated/admin.process'
 import { Route as AuthenticatedAdminProposalsRouteImport } from './routes/_authenticated/admin.proposals'
 import { Route as AuthenticatedAdminQuotesRouteImport } from './routes/_authenticated/admin.quotes'
+import { Route as AuthenticatedAdminRolesRouteImport } from './routes/_authenticated/admin.roles'
 import { Route as AuthenticatedAdminSeoRouteImport } from './routes/_authenticated/admin.seo'
 import { Route as AuthenticatedAdminServicesRouteImport } from './routes/_authenticated/admin.services'
 import { Route as AuthenticatedAdminStaffRouteImport } from './routes/_authenticated/admin.staff'
@@ -164,6 +166,11 @@ const FaqRoute = FaqRouteImport.update({
 const GdAuthRoute = GdAuthRouteImport.update({
   id: '/gd-auth',
   path: '/gd-auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ManagerRoute = ManagerRouteImport.update({
+  id: '/manager',
+  path: '/manager',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PmAuthRoute = PmAuthRouteImport.update({
@@ -505,6 +512,11 @@ const AuthenticatedAdminQuotesRoute =
     path: '/quotes',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminRolesRoute = AuthenticatedAdminRolesRouteImport.update({
+  id: '/roles',
+  path: '/roles',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminSeoRoute = AuthenticatedAdminSeoRouteImport.update({
   id: '/seo',
   path: '/seo',
@@ -564,6 +576,7 @@ export interface FileRoutesByFullPath {
   '/directors': typeof DirectorsRouteWithChildren
   '/faq': typeof FaqRoute
   '/gd-auth': typeof GdAuthRoute
+  '/manager': typeof ManagerRoute
   '/pm-auth': typeof PmAuthRoute
   '/portfolio': typeof PortfolioRoute
   '/pricing': typeof PricingRoute
@@ -628,6 +641,7 @@ export interface FileRoutesByFullPath {
   '/admin/process': typeof AuthenticatedAdminProcessRoute
   '/admin/proposals': typeof AuthenticatedAdminProposalsRoute
   '/admin/quotes': typeof AuthenticatedAdminQuotesRoute
+  '/admin/roles': typeof AuthenticatedAdminRolesRoute
   '/admin/seo': typeof AuthenticatedAdminSeoRoute
   '/admin/services': typeof AuthenticatedAdminServicesRoute
   '/admin/staff': typeof AuthenticatedAdminStaffRoute
@@ -651,6 +665,7 @@ export interface FileRoutesByTo {
   '/directors': typeof DirectorsRouteWithChildren
   '/faq': typeof FaqRoute
   '/gd-auth': typeof GdAuthRoute
+  '/manager': typeof ManagerRoute
   '/pm-auth': typeof PmAuthRoute
   '/portfolio': typeof PortfolioRoute
   '/pricing': typeof PricingRoute
@@ -710,6 +725,7 @@ export interface FileRoutesByTo {
   '/admin/process': typeof AuthenticatedAdminProcessRoute
   '/admin/proposals': typeof AuthenticatedAdminProposalsRoute
   '/admin/quotes': typeof AuthenticatedAdminQuotesRoute
+  '/admin/roles': typeof AuthenticatedAdminRolesRoute
   '/admin/seo': typeof AuthenticatedAdminSeoRoute
   '/admin/services': typeof AuthenticatedAdminServicesRoute
   '/admin/staff': typeof AuthenticatedAdminStaffRoute
@@ -736,6 +752,7 @@ export interface FileRoutesById {
   '/directors': typeof DirectorsRouteWithChildren
   '/faq': typeof FaqRoute
   '/gd-auth': typeof GdAuthRoute
+  '/manager': typeof ManagerRoute
   '/pm-auth': typeof PmAuthRoute
   '/portfolio': typeof PortfolioRoute
   '/pricing': typeof PricingRoute
@@ -800,6 +817,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/process': typeof AuthenticatedAdminProcessRoute
   '/_authenticated/admin/proposals': typeof AuthenticatedAdminProposalsRoute
   '/_authenticated/admin/quotes': typeof AuthenticatedAdminQuotesRoute
+  '/_authenticated/admin/roles': typeof AuthenticatedAdminRolesRoute
   '/_authenticated/admin/seo': typeof AuthenticatedAdminSeoRoute
   '/_authenticated/admin/services': typeof AuthenticatedAdminServicesRoute
   '/_authenticated/admin/staff': typeof AuthenticatedAdminStaffRoute
@@ -826,6 +844,7 @@ export interface FileRouteTypes {
     | '/directors'
     | '/faq'
     | '/gd-auth'
+    | '/manager'
     | '/pm-auth'
     | '/portfolio'
     | '/pricing'
@@ -890,6 +909,7 @@ export interface FileRouteTypes {
     | '/admin/process'
     | '/admin/proposals'
     | '/admin/quotes'
+    | '/admin/roles'
     | '/admin/seo'
     | '/admin/services'
     | '/admin/staff'
@@ -913,6 +933,7 @@ export interface FileRouteTypes {
     | '/directors'
     | '/faq'
     | '/gd-auth'
+    | '/manager'
     | '/pm-auth'
     | '/portfolio'
     | '/pricing'
@@ -972,6 +993,7 @@ export interface FileRouteTypes {
     | '/admin/process'
     | '/admin/proposals'
     | '/admin/quotes'
+    | '/admin/roles'
     | '/admin/seo'
     | '/admin/services'
     | '/admin/staff'
@@ -997,6 +1019,7 @@ export interface FileRouteTypes {
     | '/directors'
     | '/faq'
     | '/gd-auth'
+    | '/manager'
     | '/pm-auth'
     | '/portfolio'
     | '/pricing'
@@ -1061,6 +1084,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/process'
     | '/_authenticated/admin/proposals'
     | '/_authenticated/admin/quotes'
+    | '/_authenticated/admin/roles'
     | '/_authenticated/admin/seo'
     | '/_authenticated/admin/services'
     | '/_authenticated/admin/staff'
@@ -1087,6 +1111,7 @@ export interface RootRouteChildren {
   DirectorsRoute: typeof DirectorsRouteWithChildren
   FaqRoute: typeof FaqRoute
   GdAuthRoute: typeof GdAuthRoute
+  ManagerRoute: typeof ManagerRoute
   PmAuthRoute: typeof PmAuthRoute
   PortfolioRoute: typeof PortfolioRoute
   PricingRoute: typeof PricingRoute
@@ -1205,6 +1230,13 @@ declare module '@tanstack/react-router' {
       path: '/gd-auth'
       fullPath: '/gd-auth'
       preLoaderRoute: typeof GdAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/manager': {
+      id: '/manager'
+      path: '/manager'
+      fullPath: '/manager'
+      preLoaderRoute: typeof ManagerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/pm-auth': {
@@ -1662,6 +1694,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminQuotesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/roles': {
+      id: '/_authenticated/admin/roles'
+      path: '/roles'
+      fullPath: '/admin/roles'
+      preLoaderRoute: typeof AuthenticatedAdminRolesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/seo': {
       id: '/_authenticated/admin/seo'
       path: '/seo'
@@ -1759,6 +1798,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminProcessRoute: typeof AuthenticatedAdminProcessRoute
   AuthenticatedAdminProposalsRoute: typeof AuthenticatedAdminProposalsRoute
   AuthenticatedAdminQuotesRoute: typeof AuthenticatedAdminQuotesRoute
+  AuthenticatedAdminRolesRoute: typeof AuthenticatedAdminRolesRoute
   AuthenticatedAdminSeoRoute: typeof AuthenticatedAdminSeoRoute
   AuthenticatedAdminServicesRoute: typeof AuthenticatedAdminServicesRoute
   AuthenticatedAdminStaffRoute: typeof AuthenticatedAdminStaffRoute
@@ -1789,6 +1829,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminProcessRoute: AuthenticatedAdminProcessRoute,
   AuthenticatedAdminProposalsRoute: AuthenticatedAdminProposalsRoute,
   AuthenticatedAdminQuotesRoute: AuthenticatedAdminQuotesRoute,
+  AuthenticatedAdminRolesRoute: AuthenticatedAdminRolesRoute,
   AuthenticatedAdminSeoRoute: AuthenticatedAdminSeoRoute,
   AuthenticatedAdminServicesRoute: AuthenticatedAdminServicesRoute,
   AuthenticatedAdminStaffRoute: AuthenticatedAdminStaffRoute,
@@ -1922,6 +1963,7 @@ const rootRouteChildren: RootRouteChildren = {
   DirectorsRoute: DirectorsRouteWithChildren,
   FaqRoute: FaqRoute,
   GdAuthRoute: GdAuthRoute,
+  ManagerRoute: ManagerRoute,
   PmAuthRoute: PmAuthRoute,
   PortfolioRoute: PortfolioRoute,
   PricingRoute: PricingRoute,
