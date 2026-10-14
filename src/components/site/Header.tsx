@@ -28,7 +28,7 @@ const baseNav: NavItem[] = [
   { to: "/careers",   label: "Careers" },
   { to: "/pricing",   label: "Pricing" },
   { to: "/contact",   label: "Contact" },
-  { to: "/clients",   label: "Client Portal" },
+  
 ];
 
 type ServiceRow = { id: string; title: string; slug: string | null; description: string | null };
