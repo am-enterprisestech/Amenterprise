@@ -1,0 +1,55 @@
+{
+  "name": "AM Enterprises",
+  "short_name": "AM Enterprises",
+  "description": "Digital Ecosystems for Ambitious Businesses — AM Enterprises",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2F8FFF",
+  "orientation": "portrait-primary",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/logo.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "shortcuts": [
+    {
+      "name": "Client Portal",
+      "short_name": "Portal",
+      "description": "Sign in to your client portal",
+      "url": "/clients",
+      "icons": [{ "src": "/favicon.png", "sizes": "any" }]
+    },
+    {
+      "name": "Get a Quote",
+      "short_name": "Quote",
+      "description": "Request a project quote",
+      "url": "/quote",
+      "icons": [{ "src": "/favicon.png", "sizes": "any" }]
+    },
+    {
+      "name": "Book a Call",
+      "short_name": "Book",
+      "description": "Book a free discovery call",
+      "url": "/book",
+      "icons": [{ "src": "/favicon.png", "sizes": "any" }]
+    }
+  ]
+}

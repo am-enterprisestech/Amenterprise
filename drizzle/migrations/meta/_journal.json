@@ -1,0 +1,48 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1789112725528,
+      "tag": "0000_services_hero_media",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789373181280,
+      "tag": "0001_create_staff_portal",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789557896763,
+      "tag": "0002_am_enterprise_departments_chat",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791193377529,
+      "tag": "0003_project_connections",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791356683311,
+      "tag": "0004_client_profile_advanced",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791987427135,
+      "tag": "0005_visitor_analytics_and_portal_client_fn",
+      "breakpoints": true
+    }
+  ]
+}
