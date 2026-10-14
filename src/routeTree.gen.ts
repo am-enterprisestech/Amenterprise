@@ -51,6 +51,7 @@ import { Route as ClientsProfileRouteImport } from './routes/clients.profile'
 import { Route as ClientsProjectsRouteImport } from './routes/clients.projects'
 import { Route as ClientsSupportRouteImport } from './routes/clients.support'
 import { Route as ClientsTasksRouteImport } from './routes/clients.tasks'
+import { Route as DirectorsSlugRouteImport } from './routes/directors.$slug'
 import { Route as PortalIndexRouteImport } from './routes/portal.index'
 import { Route as PortalDeptRouteImport } from './routes/portal.$dept'
 import { Route as ServicesIndexRouteImport } from './routes/services.index'
@@ -305,6 +306,11 @@ const ClientsTasksRoute = ClientsTasksRouteImport.update({
   path: '/tasks',
   getParentRoute: () => ClientsRoute,
 } as any)
+const DirectorsSlugRoute = DirectorsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => DirectorsRoute,
+} as any)
 const PortalIndexRoute = PortalIndexRouteImport.update({
   id: '/portal/',
   path: '/portal/',
@@ -555,7 +561,7 @@ export interface FileRoutesByFullPath {
   '/clients': typeof ClientsRouteWithChildren
   '/contact': typeof ContactRoute
   '/dev-auth': typeof DevAuthRoute
-  '/directors': typeof DirectorsRoute
+  '/directors': typeof DirectorsRouteWithChildren
   '/faq': typeof FaqRoute
   '/gd-auth': typeof GdAuthRoute
   '/pm-auth': typeof PmAuthRoute
@@ -584,6 +590,7 @@ export interface FileRoutesByFullPath {
   '/clients/projects': typeof ClientsProjectsRoute
   '/clients/support': typeof ClientsSupportRoute
   '/clients/tasks': typeof ClientsTasksRoute
+  '/directors/$slug': typeof DirectorsSlugRoute
   '/portal/$dept': typeof PortalDeptRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/staff/chat': typeof StaffChatRoute
@@ -641,7 +648,7 @@ export interface FileRoutesByTo {
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
   '/dev-auth': typeof DevAuthRoute
-  '/directors': typeof DirectorsRoute
+  '/directors': typeof DirectorsRouteWithChildren
   '/faq': typeof FaqRoute
   '/gd-auth': typeof GdAuthRoute
   '/pm-auth': typeof PmAuthRoute
@@ -666,6 +673,7 @@ export interface FileRoutesByTo {
   '/clients/projects': typeof ClientsProjectsRoute
   '/clients/support': typeof ClientsSupportRoute
   '/clients/tasks': typeof ClientsTasksRoute
+  '/directors/$slug': typeof DirectorsSlugRoute
   '/portal/$dept': typeof PortalDeptRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/staff/chat': typeof StaffChatRoute
@@ -725,7 +733,7 @@ export interface FileRoutesById {
   '/clients': typeof ClientsRouteWithChildren
   '/contact': typeof ContactRoute
   '/dev-auth': typeof DevAuthRoute
-  '/directors': typeof DirectorsRoute
+  '/directors': typeof DirectorsRouteWithChildren
   '/faq': typeof FaqRoute
   '/gd-auth': typeof GdAuthRoute
   '/pm-auth': typeof PmAuthRoute
@@ -754,6 +762,7 @@ export interface FileRoutesById {
   '/clients/projects': typeof ClientsProjectsRoute
   '/clients/support': typeof ClientsSupportRoute
   '/clients/tasks': typeof ClientsTasksRoute
+  '/directors/$slug': typeof DirectorsSlugRoute
   '/portal/$dept': typeof PortalDeptRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/staff/chat': typeof StaffChatRoute
@@ -843,6 +852,7 @@ export interface FileRouteTypes {
     | '/clients/projects'
     | '/clients/support'
     | '/clients/tasks'
+    | '/directors/$slug'
     | '/portal/$dept'
     | '/services/$slug'
     | '/staff/chat'
@@ -925,6 +935,7 @@ export interface FileRouteTypes {
     | '/clients/projects'
     | '/clients/support'
     | '/clients/tasks'
+    | '/directors/$slug'
     | '/portal/$dept'
     | '/services/$slug'
     | '/staff/chat'
@@ -1012,6 +1023,7 @@ export interface FileRouteTypes {
     | '/clients/projects'
     | '/clients/support'
     | '/clients/tasks'
+    | '/directors/$slug'
     | '/portal/$dept'
     | '/services/$slug'
     | '/staff/chat'
@@ -1072,7 +1084,7 @@ export interface RootRouteChildren {
   ClientsRoute: typeof ClientsRouteWithChildren
   ContactRoute: typeof ContactRoute
   DevAuthRoute: typeof DevAuthRoute
-  DirectorsRoute: typeof DirectorsRoute
+  DirectorsRoute: typeof DirectorsRouteWithChildren
   FaqRoute: typeof FaqRoute
   GdAuthRoute: typeof GdAuthRoute
   PmAuthRoute: typeof PmAuthRoute
@@ -1390,6 +1402,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/clients/tasks'
       preLoaderRoute: typeof ClientsTasksRouteImport
       parentRoute: typeof ClientsRoute
+    }
+    '/directors/$slug': {
+      id: '/directors/$slug'
+      path: '/$slug'
+      fullPath: '/directors/$slug'
+      preLoaderRoute: typeof DirectorsSlugRouteImport
+      parentRoute: typeof DirectorsRoute
     }
     '/portal/': {
       id: '/portal/'
@@ -1824,6 +1843,18 @@ const ClientsRouteChildren: ClientsRouteChildren = {
 const ClientsRouteWithChildren =
   ClientsRoute._addFileChildren(ClientsRouteChildren)
 
+interface DirectorsRouteChildren {
+  DirectorsSlugRoute: typeof DirectorsSlugRoute
+}
+
+const DirectorsRouteChildren: DirectorsRouteChildren = {
+  DirectorsSlugRoute: DirectorsSlugRoute,
+}
+
+const DirectorsRouteWithChildren = DirectorsRoute._addFileChildren(
+  DirectorsRouteChildren,
+)
+
 interface ServicesRouteChildren {
   ServicesSlugRoute: typeof ServicesSlugRoute
   ServicesIndexRoute: typeof ServicesIndexRoute
@@ -1888,7 +1919,7 @@ const rootRouteChildren: RootRouteChildren = {
   ClientsRoute: ClientsRouteWithChildren,
   ContactRoute: ContactRoute,
   DevAuthRoute: DevAuthRoute,
-  DirectorsRoute: DirectorsRoute,
+  DirectorsRoute: DirectorsRouteWithChildren,
   FaqRoute: FaqRoute,
   GdAuthRoute: GdAuthRoute,
   PmAuthRoute: PmAuthRoute,

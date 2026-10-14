@@ -174,10 +174,9 @@ function AnimLine({
           transition-all
           duration-700
           ease-[cubic-bezier(0.22,1,0.36,1)]
-          ${
-            visible
-              ? "translate-y-0 opacity-100"
-              : "translate-y-full opacity-0"
+          ${visible
+            ? "translate-y-0 opacity-100"
+            : "translate-y-full opacity-0"
           }
         `}
       >
@@ -769,6 +768,7 @@ export function HeroSlider() {
                 delay={360}
                 className="mt-6"
               >
+
                 <p
                   className="
                     max-w-[500px]
@@ -778,6 +778,11 @@ export function HeroSlider() {
                     sm:text-lg
                   "
                 >
+                  <h5>
+                    <br /> <b> Need an ERP, Custom Software, or a Mobile App?  </b>     <br />
+                  </h5>
+
+
                   We craft scalable, high-performance software
                   solutions that drive growth, engage users, and
                   create real impact.

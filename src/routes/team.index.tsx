@@ -20,20 +20,34 @@ export const Route = createFileRoute("/team/")({
 });
 
 type Member = {
-  id: string; name: string; slug: string | null; role_title: string | null; bio: string | null;
-  photo_url: string | null; linkedin_url: string | null; twitter_url: string | null;
-  is_director: boolean | null;
+  id: string;
+  name: string;
+  role_title: string | null;
+  bio: string | null;
+  photo_url: string | null;
+  linkedin_url: string | null;
+  twitter_url: string | null;
 };
+
+// Role titles that belong on the Directors page, not Team page
+const DIRECTOR_TITLES = ["director", "founder", "ceo", "chief", "partner", "co-founder"];
+
+function isDirector(m: Member) {
+  const t = m.role_title?.toLowerCase() ?? "";
+  return DIRECTOR_TITLES.some((kw) => t.includes(kw));
+}
 
 function TeamPage() {
   useApplyPageSeo("/team");
   const { rows, loading } = useLiveList<Member>("team_members", {
     orderBy: { column: "sort_order" },
-    select: "id,name,slug,role_title,bio,photo_url,linkedin_url,twitter_url,is_director,sort_order,published",
+    filterPublished: false,
+    // Only select columns that have anon SELECT grant in Supabase RLS
+    select: "id,name,role_title,bio,photo_url,linkedin_url,twitter_url,sort_order",
   });
 
-  // Filter out directors — they have their own page at /directors
-  const members = rows.filter((m) => m.is_director !== true);
+  // Exclude directors — they have their own page at /directors
+  const members = rows.filter((m) => !isDirector(m));
 
   return (
     <>
@@ -90,9 +104,7 @@ function TeamPage() {
                 );
                 return (
                   <Reveal key={m.id} delay={i * 60}>
-                    {m.slug ? (
-                      <Link to="/team/$slug" params={{ slug: m.slug }} className="block h-full">{card}</Link>
-                    ) : card}
+                    {card}
                   </Reveal>
                 );
               })}
