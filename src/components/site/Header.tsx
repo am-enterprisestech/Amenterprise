@@ -8,50 +8,37 @@ type NavChild = { to: string; label: string; desc?: string };
 type NavItem  = { to: string; label: string; children?: NavChild[] };
 
 const baseNav: NavItem[] = [
+  { to: "/", label: "Home" },
+  {
+    to: "/about",
+    label: "About",
+    children: [
+      { to: "/about",     label: "About AM Enterprise", desc: "Our story — from freelancer to global team" },
+      { to: "/directors", label: "Our Directors",        desc: "Meet the leadership driving AM Enterprise" },
+      { to: "/team",      label: "Our Team",             desc: "The people building your digital ecosystem" },
+    ],
+  },
   {
     to: "/services",
     label: "Services",
     children: [], // populated dynamically from Supabase
   },
-  {
-    to: "/portfolio",
-    label: "Work",
-    children: [
-      { to: "/portfolio",   label: "All Projects",    desc: "Websites, apps, ERP and custom systems" },
-      { to: "/pricing",     label: "Pricing",         desc: "Packages and engagement models" },
-      { to: "/calculator",  label: "Cost Calculator", desc: "Estimate your project in minutes" },
-    ],
-  },
-  {
-    to: "/about",
-    label: "Process",
-    children: [
-      { to: "/about",   label: "How We Work",    desc: "Our approach from discovery to growth" },
-      { to: "/team",    label: "Our Team",        desc: "The people building your ecosystem" },
-      { to: "/careers", label: "Careers",         desc: "Join AM Enterprises" },
-    ],
-  },
-  {
-    to: "/about",
-    label: "About",
-    children: [
-      { to: "/about",   label: "Our Company",    desc: "Who we are and why we work differently" },
-      { to: "/team",    label: "Team",            desc: "Founders, engineers, designers" },
-      { to: "/blog",    label: "Insights",        desc: "Thinking on technology and business" },
-      { to: "/faq",     label: "FAQ",             desc: "Common questions answered" },
-    ],
-  },
-  { to: "/contact", label: "Contact" },
+  { to: "/portfolio", label: "Portfolio" },
+  { to: "/blog",      label: "Blog" },
+  { to: "/careers",   label: "Careers" },
+  { to: "/pricing",   label: "Pricing" },
+  { to: "/contact",   label: "Contact" },
+  { to: "/clients",   label: "Client Portal" },
 ];
 
 type ServiceRow = { id: string; title: string; slug: string | null; description: string | null };
 
 export function Header() {
-  const [open, setOpen]           = useState(false);
-  const [openMenu, setOpenMenu]   = useState<string | null>(null);
+  const [open, setOpen]             = useState(false);
+  const [openMenu, setOpenMenu]     = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState<string | null>(null);
-  const [scrolled, setScrolled]   = useState(false);
-  const pathname  = useRouterState({ select: (s) => s.location.pathname });
+  const [scrolled, setScrolled]     = useState(false);
+  const pathname   = useRouterState({ select: (s) => s.location.pathname });
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const { rows: services } = useLiveList<ServiceRow>("services", { orderBy: { column: "sort_order" } });
 
@@ -105,19 +92,23 @@ export function Header() {
           : "bg-white/70 backdrop-blur-md"
       }`}
     >
-      <nav className="mx-auto flex max-w-[1280px] items-center justify-between px-8 py-3.5 lg:px-8">
+      <nav
+        role="navigation"
+        aria-label="Main navigation"
+        className="mx-auto flex max-w-[1280px] items-center justify-between px-8 py-3.5 lg:px-8"
+      >
         {/* Logo */}
-        <Link to="/" className="flex shrink-0 items-center gap-2.5" aria-label="AM Enterprises — Home">
+        <Link to="/" className="flex shrink-0 items-center gap-2.5" aria-label="AM Enterprise — Home">
           <Logo className="h-10 w-auto" />
         </Link>
 
         {/* Desktop nav */}
         <ul className="hidden items-center gap-1 xl:flex">
           {nav.map((l) => {
-            const active     = pathname === l.to || (l.children ?? []).some((c) => c.to === pathname);
-            const hasMenu    = (l.children?.length ?? 0) > 0;
-            const menuOpen   = openMenu === l.label;
-            const isWide     = (l.children?.length ?? 0) > 6;
+            const active   = pathname === l.to || (l.children ?? []).some((c) => c.to === pathname);
+            const hasMenu  = (l.children?.length ?? 0) > 0;
+            const menuOpen = openMenu === l.label;
+            const isWide   = (l.children?.length ?? 0) > 6;
 
             return (
               <li
@@ -134,7 +125,7 @@ export function Header() {
                       ? "text-cocoa"
                       : "text-espresso/65 hover:text-espresso"
                   }`}
-                  aria-haspopup={hasMenu || undefined}
+                  aria-haspopup={hasMenu ? "true" : undefined}
                   aria-expanded={hasMenu ? menuOpen : undefined}
                 >
                   {l.label}
@@ -151,7 +142,7 @@ export function Header() {
                 {/* Dropdown */}
                 {hasMenu && menuOpen && (
                   <div
-                    className={`absolute left-1/2 top-full z-50 mt-2.5 -translate-x-1/2 rounded-2xl border border-border bg-white p-2 shadow-luxury ${
+                    className={`absolute left-1/2 top-full z-50 mt-2.5 -translate-x-1/2 animate-in fade-in slide-in-from-top-1 rounded-2xl border border-border bg-white p-2 shadow-luxury duration-150 ${
                       isWide ? "w-[580px]" : "w-[280px]"
                     }`}
                   >
@@ -238,6 +229,7 @@ export function Header() {
                       <button
                         onClick={() => setMobileOpen(expanded ? null : l.label)}
                         aria-label={`Toggle ${l.label}`}
+                        aria-expanded={expanded}
                         className="px-3 py-2.5"
                       >
                         <ChevronDown

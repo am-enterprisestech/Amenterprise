@@ -4,22 +4,21 @@ import { useApplyPageSeo } from "@/lib/page-seo";
 import { ArrowRight, CheckCircle2, Sparkles } from "lucide-react";
 import { PageHeader } from "@/components/site/PageHeader";
 import { Reveal } from "@/components/site/Reveal";
-import { useLiveList } from "@/lib/use-live-list";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About AM Enterprises — How we think and how we work" },
+      { title: "About AM Enterprise — From Zero to Global" },
       {
         name: "description",
         content:
-          "AM Enterprises builds complete digital ecosystems for businesses. Learn about how we think, what we believe, and why we work differently from a typical software house.",
+          "AM Enterprise's story — from a solo freelancer in 2018 to a 15–17 person team with offices in Pakistan and the UK. Built on hustle, grown through trust, scaled with technology.",
       },
-      { property: "og:title", content: "About AM Enterprises — How we think and how we work" },
+      { property: "og:title", content: "About AM Enterprise — From Zero to Global" },
       {
         property: "og:description",
         content:
-          "AM Enterprises builds complete digital ecosystems for businesses. Learn about how we think, what we believe, and why we work differently from a typical software house.",
+          "AM Enterprise's story — from a solo freelancer in 2018 to a 15–17 person team with offices in Pakistan and the UK.",
       },
       { property: "og:type", content: "website" },
       { property: "og:url", content: SITE_URL + "/about" },
@@ -29,241 +28,197 @@ export const Route = createFileRoute("/about")({
   component: AboutPage,
 });
 
-/* ─── Types (matches existing Supabase about_blocks table) ───────────────── */
+/* ─── Timeline data ─────────────────────────────────────────────────────── */
 
-type Block = {
-  id: string;
-  section_key: string;
-  layout: string;
-  eyebrow: string | null;
-  title: string;
-  body: string | null;
-  items: string[] | null;
-  image_url: string | null;
-};
+const timeline = [
+  {
+    year: "2018",
+    label: "The Beginning",
+    text: "Started as a freelancer. One laptop, one dream. Took the first international project solo and proved that quality work speaks for itself.",
+  },
+  {
+    year: "2023",
+    label: "Building the Team",
+    text: "Formed a proper team. Began working consistently with international clients across multiple industries — turning solo hustle into collective excellence.",
+  },
+  {
+    year: "2025 — Early",
+    label: "First Offices",
+    text: "Opened the first official office in Islamabad, Pakistan. Simultaneously established a presence in Wimbledon, UK — AM Enterprise's first international office.",
+  },
+  {
+    year: "2025 — Now",
+    label: "Scaling Up",
+    text: "Proper team structure built. AM Enterprise now operates with 15–17 professionals across departments, 3 offices in Pakistan, 1 in the UK, and growing networks worldwide.",
+  },
+];
 
-function splitItem(item: string) {
-  const parts = item.split(" — ");
-  return parts.length > 1
-    ? { head: parts[0], rest: parts.slice(1).join(" — ") }
-    : { head: item, rest: "" };
-}
+/* ─── Stats data ────────────────────────────────────────────────────────── */
 
-function Paragraphs({ body }: { body: string }) {
-  return (
-    <>
-      {body.split(/\n{2,}/).map((p, i) => (
-        <p key={i} className="mt-4 text-base leading-relaxed text-body-text">
-          {p}
-        </p>
-      ))}
-    </>
-  );
-}
+const stats = [
+  { value: "15–17", label: "Team Members" },
+  { value: "3",     label: "Offices in Pakistan" },
+  { value: "1",     label: "Office in UK (Wimbledon)" },
+  { value: "7+",    label: "Years of Experience" },
+  { value: "∞",     label: "Global Networks & Collaborations" },
+];
 
-/* ─── Block renderers (layouts unchanged, styling updated) ───────────────── */
+/* ─── Values data ───────────────────────────────────────────────────────── */
 
-function TextBlock({ b }: { b: Block }) {
-  return (
-    <section className="py-16 lg:py-20">
-      <div className="mx-auto max-w-3xl px-8">
-        <Reveal>
-          {b.eyebrow && (
-            <span className="inline-flex items-center gap-2 rounded-full border border-cocoa/20 bg-cocoa/8 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-cocoa">
-              <span className="h-1.5 w-1.5 rounded-full bg-cocoa" />
-              {b.eyebrow}
-            </span>
-          )}
-          <h2 className="mt-4 font-display text-3xl font-black leading-[1.06] tracking-tight text-espresso sm:text-4xl">
-            {b.title}
-          </h2>
-          {b.body && <Paragraphs body={b.body} />}
-          {b.items && b.items.length > 0 && (
-            <ul className="mt-8 grid gap-3 sm:grid-cols-2">
-              {b.items.map((item) => (
-                <li
-                  key={item}
-                  className="flex items-start gap-3 rounded-xl border border-border bg-sand p-4 text-sm text-body-text"
-                >
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-cocoa" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-        </Reveal>
-      </div>
-    </section>
-  );
-}
-
-function CardsBlock({ b }: { b: Block }) {
-  return (
-    <section className="py-16 lg:py-20">
-      <div className="mx-auto max-w-[1280px] px-8">
-        <Reveal>
-          <div className="max-w-2xl">
-            {b.eyebrow && (
-              <span className="inline-flex items-center gap-2 rounded-full border border-cocoa/20 bg-cocoa/8 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-cocoa">
-                <span className="h-1.5 w-1.5 rounded-full bg-cocoa" />
-                {b.eyebrow}
-              </span>
-            )}
-            <h2 className="mt-4 font-display text-3xl font-black leading-[1.06] tracking-tight text-espresso sm:text-4xl">
-              {b.title}
-            </h2>
-            {b.body && <Paragraphs body={b.body} />}
-          </div>
-        </Reveal>
-        <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {(b.items ?? []).map((item, i) => {
-            const { head, rest } = splitItem(item);
-            return (
-              <Reveal key={item} delay={i * 70}>
-                <div className="h-full rounded-2xl border border-border bg-white p-7 transition hover:border-cocoa/25 hover:shadow-soft">
-                  <div className="grid h-11 w-11 place-items-center rounded-xl bg-cocoa/10 text-cocoa">
-                    <Sparkles className="h-5 w-5" />
-                  </div>
-                  <h3 className="mt-5 font-display text-lg font-black text-espresso">{head}</h3>
-                  {rest && (
-                    <p className="mt-2 text-sm leading-relaxed text-body-text">{rest}</p>
-                  )}
-                </div>
-              </Reveal>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function ListBlock({ b }: { b: Block }) {
-  return (
-    <section className="py-16 lg:py-20">
-      <div className="mx-auto max-w-[1280px] px-8">
-        <Reveal>
-          {b.eyebrow && (
-            <span className="inline-flex items-center gap-2 rounded-full border border-cocoa/20 bg-cocoa/8 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-cocoa">
-              <span className="h-1.5 w-1.5 rounded-full bg-cocoa" />
-              {b.eyebrow}
-            </span>
-          )}
-          <h2 className="mt-4 font-display text-3xl font-black leading-[1.06] tracking-tight text-espresso sm:text-4xl">
-            {b.title}
-          </h2>
-          {b.body && <Paragraphs body={b.body} />}
-        </Reveal>
-        <div className="mt-8 flex flex-wrap gap-2.5">
-          {(b.items ?? []).map((item, i) => (
-            <Reveal key={item} delay={Math.min(i * 30, 280)}>
-              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-white px-5 py-2.5 text-sm font-semibold text-espresso shadow-soft transition hover:border-cocoa/25">
-                <span className="h-1.5 w-1.5 rounded-full bg-cocoa" />
-                {item}
-              </span>
-            </Reveal>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function SplitGroup({ blocks }: { blocks: Block[] }) {
-  return (
-    <section className="py-16 lg:py-20">
-      <div className="mx-auto grid max-w-[1280px] gap-6 px-8 md:grid-cols-2">
-        {blocks.map((b, i) => (
-          <Reveal key={b.id} delay={i * 100}>
-            <div className="h-full rounded-2xl border border-border bg-white p-8 lg:p-10">
-              {b.eyebrow && (
-                <span className="inline-flex items-center gap-2 rounded-full border border-cocoa/20 bg-cocoa/8 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-cocoa">
-                  {b.eyebrow}
-                </span>
-              )}
-              <h2 className="mt-3 font-display text-2xl font-black leading-tight text-espresso sm:text-3xl">
-                {b.title}
-              </h2>
-              {b.body && <Paragraphs body={b.body} />}
-            </div>
-          </Reveal>
-        ))}
-      </div>
-    </section>
-  );
-}
+const values = [
+  {
+    title: "Quality First",
+    body: "We don't ship until it's right. Every line of code, every design decision, every deliverable goes through the same standard.",
+  },
+  {
+    title: "Client-Focused",
+    body: "Your success is the only metric that matters. We listen, we ask hard questions, and we tell you honestly what's worth building.",
+  },
+  {
+    title: "Tech-Driven",
+    body: "We build with the best tools available — and we build to last. No shortcuts, no throwaway architecture.",
+  },
+];
 
 /* ─── Page ───────────────────────────────────────────────────────────────── */
 
 function AboutPage() {
   useApplyPageSeo("/about");
-  const { rows } = useLiveList<Block>("about_blocks", {
-    orderBy: { column: "sort_order", ascending: true },
-  });
-
-  // Group consecutive "split" blocks into paired two-column sections
-  const groups: { kind: string; blocks: Block[] }[] = [];
-  for (const b of rows) {
-    const last = groups[groups.length - 1];
-    if (b.layout === "split" && last?.kind === "split") last.blocks.push(b);
-    else groups.push({ kind: b.layout, blocks: [b] });
-  }
 
   return (
     <>
+      {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <PageHeader
-        eyebrow="About us"
-        title="We understand the business. Then we build the technology."
-        description="AM Enterprises is a digital ecosystem company. We work with founders and growing businesses to design and build the connected technology that helps them operate and scale."
+        eyebrow="Our Story"
+        title="From Zero to Global — The AM Enterprise Story"
+        description="Built on hustle, grown through trust, scaled with technology."
       />
 
-      {groups.map((g) => {
-        if (g.kind === "split") return <SplitGroup key={g.blocks[0].id} blocks={g.blocks} />;
-        const b = g.blocks[0];
-        if (b.layout === "cards") return <CardsBlock key={b.id} b={b} />;
-        if (b.layout === "list")  return <ListBlock  key={b.id} b={b} />;
-        return <TextBlock key={b.id} b={b} />;
-      })}
+      {/* ── Timeline ─────────────────────────────────────────────────────── */}
+      <section className="py-20 lg:py-24">
+        <div className="mx-auto max-w-3xl px-8">
+          <Reveal>
+            <span className="inline-flex items-center gap-2 rounded-full border border-cocoa/20 bg-cocoa/8 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-cocoa">
+              <span className="h-1.5 w-1.5 rounded-full bg-cocoa" />
+              Journey
+            </span>
+            <h2 className="mt-4 font-display text-3xl font-black leading-[1.06] tracking-tight text-espresso sm:text-4xl">
+              How we got here
+            </h2>
+          </Reveal>
 
-      {/* Founders strip */}
+          <div className="relative mt-12">
+            {/* vertical line */}
+            <div className="absolute left-6 top-0 h-full w-px bg-border" aria-hidden="true" />
+
+            <ol className="space-y-10">
+              {timeline.map((entry, i) => (
+                <Reveal key={entry.year} delay={i * 100}>
+                  <li className="relative flex gap-6 pl-16">
+                    {/* year badge */}
+                    <div className="absolute left-0 top-0 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-cocoa bg-white text-[10px] font-black uppercase tracking-widest text-cocoa">
+                      <span className="leading-none">{entry.year.split("—")[0].trim().slice(2)}</span>
+                    </div>
+                    <div className="rounded-2xl border border-border bg-white p-6 shadow-soft transition hover:border-cocoa/25 hover:shadow-luxury">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.22em] text-cocoa">
+                        {entry.year}
+                      </p>
+                      <h3 className="mt-1 font-display text-xl font-black text-espresso">
+                        {entry.label}
+                      </h3>
+                      <p className="mt-2 text-sm leading-relaxed text-body-text">{entry.text}</p>
+                    </div>
+                  </li>
+                </Reveal>
+              ))}
+            </ol>
+          </div>
+        </div>
+      </section>
+
+      {/* ── By the Numbers ───────────────────────────────────────────────── */}
+      <section className="border-y border-border bg-sand py-16 lg:py-20">
+        <div className="mx-auto max-w-[1280px] px-8">
+          <Reveal>
+            <span className="inline-flex items-center gap-2 rounded-full border border-cocoa/20 bg-cocoa/8 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-cocoa">
+              <span className="h-1.5 w-1.5 rounded-full bg-cocoa" />
+              By the Numbers
+            </span>
+          </Reveal>
+          <div className="mt-10 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-5">
+            {stats.map((s, i) => (
+              <Reveal key={s.label} delay={i * 60}>
+                <div className="rounded-2xl border border-border bg-white p-6 text-center shadow-soft">
+                  <p className="font-display text-3xl font-black text-cocoa sm:text-4xl">{s.value}</p>
+                  <p className="mt-2 text-xs font-semibold leading-snug text-body-text">{s.label}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Values / Culture ─────────────────────────────────────────────── */}
+      <section className="py-20 lg:py-24">
+        <div className="mx-auto max-w-[1280px] px-8">
+          <Reveal>
+            <div className="max-w-2xl">
+              <span className="inline-flex items-center gap-2 rounded-full border border-cocoa/20 bg-cocoa/8 px-4 py-1.5 text-[11px] font-bold uppercase tracking-[0.22em] text-cocoa">
+                <span className="h-1.5 w-1.5 rounded-full bg-cocoa" />
+                How we work
+              </span>
+              <h2 className="mt-4 font-display text-3xl font-black leading-[1.06] tracking-tight text-espresso sm:text-4xl">
+                Quality-first. Client-focused. Tech-driven.
+              </h2>
+              <p className="mt-4 text-base leading-relaxed text-body-text">
+                These aren't slogans — they're the standards we hold ourselves to on every project, with every client.
+              </p>
+            </div>
+          </Reveal>
+          <div className="mt-10 grid gap-5 sm:grid-cols-3">
+            {values.map((v, i) => (
+              <Reveal key={v.title} delay={i * 70}>
+                <div className="h-full rounded-2xl border border-border bg-white p-7 transition hover:border-cocoa/25 hover:shadow-soft">
+                  <div className="grid h-11 w-11 place-items-center rounded-xl bg-cocoa/10 text-cocoa">
+                    <Sparkles className="h-5 w-5" />
+                  </div>
+                  <h3 className="mt-5 font-display text-lg font-black text-espresso">{v.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-body-text">{v.body}</p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Directors strip ──────────────────────────────────────────────── */}
       <section className="border-y border-border bg-sand py-16">
         <div className="mx-auto max-w-[1280px] px-8">
           <Reveal>
-            <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-espresso/40">
-              Leadership
-            </p>
-            <div className="mt-6 grid gap-5 sm:grid-cols-2">
-              {[
-                {
-                  name: "Moez Rehman",
-                  role: "Founder & CEO",
-                  bio: "Leads the company's vision, client strategy and business growth.",
-                },
-                {
-                  name: "Ayesha Moez",
-                  role: "Co-Founder & CTO",
-                  bio: "Responsible for technical direction, engineering quality and product delivery.",
-                },
-              ].map((f, i) => (
-                <Reveal key={f.name} delay={i * 80}>
-                  <div className="flex items-start gap-4 rounded-2xl border border-border bg-white p-6">
-                    <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-cocoa/10 text-cocoa ring-1 ring-cocoa/20">
-                      <span className="font-display text-lg font-black">{f.name[0]}</span>
-                    </div>
-                    <div>
-                      <p className="font-display text-lg font-black text-espresso">{f.name}</p>
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-cocoa">{f.role}</p>
-                      <p className="mt-2 text-sm leading-relaxed text-body-text">{f.bio}</p>
-                    </div>
-                  </div>
-                </Reveal>
-              ))}
+            <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-center">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-espresso/40">
+                  Leadership
+                </p>
+                <h2 className="mt-2 font-display text-2xl font-black text-espresso sm:text-3xl">
+                  Meet the directors
+                </h2>
+                <p className="mt-2 text-sm leading-relaxed text-body-text">
+                  The people who set the direction, own the strategy, and make sure AM Enterprise delivers.
+                </p>
+              </div>
+              <Link
+                to="/directors"
+                className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-cocoa px-6 py-3 text-sm font-bold text-white shadow-soft transition hover:bg-copper"
+              >
+                View all directors <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
           </Reveal>
         </div>
       </section>
 
-      {/* Bottom CTA */}
+      {/* ── Bottom CTA ───────────────────────────────────────────────────── */}
       <section className="py-20">
         <div className="mx-auto max-w-[1280px] px-8">
           <Reveal>

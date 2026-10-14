@@ -20,6 +20,7 @@ import { Route as CareersRouteImport } from './routes/careers'
 import { Route as ClientsRouteImport } from './routes/clients'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as DevAuthRouteImport } from './routes/dev-auth'
+import { Route as DirectorsRouteImport } from './routes/directors'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as GdAuthRouteImport } from './routes/gd-auth'
 import { Route as PmAuthRouteImport } from './routes/pm-auth'
@@ -147,6 +148,11 @@ const ContactRoute = ContactRouteImport.update({
 const DevAuthRoute = DevAuthRouteImport.update({
   id: '/dev-auth',
   path: '/dev-auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DirectorsRoute = DirectorsRouteImport.update({
+  id: '/directors',
+  path: '/directors',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FaqRoute = FaqRouteImport.update({
@@ -549,6 +555,7 @@ export interface FileRoutesByFullPath {
   '/clients': typeof ClientsRouteWithChildren
   '/contact': typeof ContactRoute
   '/dev-auth': typeof DevAuthRoute
+  '/directors': typeof DirectorsRoute
   '/faq': typeof FaqRoute
   '/gd-auth': typeof GdAuthRoute
   '/pm-auth': typeof PmAuthRoute
@@ -634,6 +641,7 @@ export interface FileRoutesByTo {
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
   '/dev-auth': typeof DevAuthRoute
+  '/directors': typeof DirectorsRoute
   '/faq': typeof FaqRoute
   '/gd-auth': typeof GdAuthRoute
   '/pm-auth': typeof PmAuthRoute
@@ -717,6 +725,7 @@ export interface FileRoutesById {
   '/clients': typeof ClientsRouteWithChildren
   '/contact': typeof ContactRoute
   '/dev-auth': typeof DevAuthRoute
+  '/directors': typeof DirectorsRoute
   '/faq': typeof FaqRoute
   '/gd-auth': typeof GdAuthRoute
   '/pm-auth': typeof PmAuthRoute
@@ -805,6 +814,7 @@ export interface FileRouteTypes {
     | '/clients'
     | '/contact'
     | '/dev-auth'
+    | '/directors'
     | '/faq'
     | '/gd-auth'
     | '/pm-auth'
@@ -890,6 +900,7 @@ export interface FileRouteTypes {
     | '/careers'
     | '/contact'
     | '/dev-auth'
+    | '/directors'
     | '/faq'
     | '/gd-auth'
     | '/pm-auth'
@@ -972,6 +983,7 @@ export interface FileRouteTypes {
     | '/clients'
     | '/contact'
     | '/dev-auth'
+    | '/directors'
     | '/faq'
     | '/gd-auth'
     | '/pm-auth'
@@ -1060,6 +1072,7 @@ export interface RootRouteChildren {
   ClientsRoute: typeof ClientsRouteWithChildren
   ContactRoute: typeof ContactRoute
   DevAuthRoute: typeof DevAuthRoute
+  DirectorsRoute: typeof DirectorsRoute
   FaqRoute: typeof FaqRoute
   GdAuthRoute: typeof GdAuthRoute
   PmAuthRoute: typeof PmAuthRoute
@@ -1159,6 +1172,13 @@ declare module '@tanstack/react-router' {
       path: '/dev-auth'
       fullPath: '/dev-auth'
       preLoaderRoute: typeof DevAuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/directors': {
+      id: '/directors'
+      path: '/directors'
+      fullPath: '/directors'
+      preLoaderRoute: typeof DirectorsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/faq': {
@@ -1868,6 +1888,7 @@ const rootRouteChildren: RootRouteChildren = {
   ClientsRoute: ClientsRouteWithChildren,
   ContactRoute: ContactRoute,
   DevAuthRoute: DevAuthRoute,
+  DirectorsRoute: DirectorsRoute,
   FaqRoute: FaqRoute,
   GdAuthRoute: GdAuthRoute,
   PmAuthRoute: PmAuthRoute,

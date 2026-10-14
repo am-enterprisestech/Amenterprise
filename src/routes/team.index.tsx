@@ -22,31 +22,41 @@ export const Route = createFileRoute("/team/")({
 type Member = {
   id: string; name: string; slug: string | null; role_title: string | null; bio: string | null;
   photo_url: string | null; linkedin_url: string | null; twitter_url: string | null;
+  is_director: boolean | null;
 };
 
 function TeamPage() {
   useApplyPageSeo("/team");
   const { rows, loading } = useLiveList<Member>("team_members", {
     orderBy: { column: "sort_order" },
-    select: "id,name,slug,role_title,bio,photo_url,linkedin_url,twitter_url,sort_order,published",
+    select: "id,name,slug,role_title,bio,photo_url,linkedin_url,twitter_url,is_director,sort_order,published",
   });
+
+  // Filter out directors — they have their own page at /directors
+  const members = rows.filter((m) => m.is_director !== true);
 
   return (
     <>
       <PageHeader
-        eyebrow="Our team"
-        title="The people who will build it."
+        eyebrow="Our Team"
+        title="The people who build it."
         description="Senior, accountable and directly involved. You always know who is working on your project."
       />
       <section className="pb-24">
         <div className="mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
+          <div className="mb-8 text-center text-sm text-foreground/60">
+            Looking for leadership?{" "}
+            <Link to="/directors" className="font-semibold text-cocoa underline-offset-2 hover:underline">
+              Meet our directors →
+            </Link>
+          </div>
           {loading ? (
             <div className="grid place-items-center py-24 text-sm text-foreground/50">Loading team…</div>
-          ) : rows.length === 0 ? (
+          ) : members.length === 0 ? (
             <div className="rounded-3xl border border-dashed border-espresso/20 p-12 text-center text-sm text-foreground/50">No team members published yet.</div>
           ) : (
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {rows.map((m, i) => {
+              {members.map((m, i) => {
                 const card = (
                   <div className="group relative h-full overflow-hidden rounded-3xl border border-border bg-card shadow-soft transition duration-500 hover:-translate-y-1.5 hover:shadow-luxury">
                     <div className="relative aspect-square overflow-hidden bg-sand">
