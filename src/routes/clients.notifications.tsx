@@ -18,12 +18,12 @@ export const Route = createFileRoute("/clients/notifications")({
 interface Note { id: string; title: string; body: string | null; kind: string; link: string | null; is_read: boolean; created_at: string }
 
 const KIND_META: Record<string, { icon: React.ElementType; bg: string; color: string }> = {
-  info:     { icon: Info,         bg: "bg-blue-100",    color: "text-blue-600"    },
-  warning:  { icon: AlertTriangle, bg: "bg-amber-100",  color: "text-amber-600"   },
-  success:  { icon: CheckCircle2, bg: "bg-emerald-100", color: "text-emerald-600" },
-  team:     { icon: Zap,          bg: "bg-indigo-100",  color: "text-indigo-600"  },
-  project:  { icon: Zap,          bg: "bg-purple-100",  color: "text-purple-600"  },
-  invoice:  { icon: Bell,         bg: "bg-orange-100",  color: "text-orange-600"  },
+  info:     { icon: Info,          bg: "bg-[#EAF7FF]",  color: "text-[#4BAFE8]"   },
+  warning:  { icon: AlertTriangle, bg: "bg-[#DDF2FF]",  color: "text-[#12344D]"   },
+  success:  { icon: CheckCircle2,  bg: "bg-emerald-50", color: "text-emerald-700" },
+  team:     { icon: Zap,           bg: "bg-[#EAF7FF]",  color: "text-[#12344D]"   },
+  project:  { icon: Zap,           bg: "bg-[#DDF2FF]",  color: "text-[#4BAFE8]"   },
+  invoice:  { icon: Bell,          bg: "bg-[#EAF7FF]",  color: "text-[#12344D]"   },
 };
 
 function timeAgo(iso: string) {

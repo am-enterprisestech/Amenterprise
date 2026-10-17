@@ -18,17 +18,17 @@ export const Route = createFileRoute("/clients/tasks")({
 interface Task { id: string; title: string; description: string | null; status: string; priority: string; progress: number; assignee: string | null; due_date: string | null }
 
 const COLUMNS = [
-  { key: "todo",        label: "To Do",       icon: Circle,        color: "text-slate-500", bg: "bg-slate-50 border-slate-200" },
-  { key: "in_progress", label: "In Progress",  icon: Loader2,       color: "text-blue-600",  bg: "bg-blue-50 border-blue-200" },
-  { key: "review",      label: "In Review",    icon: AlertCircle,   color: "text-violet-600", bg: "bg-violet-50 border-violet-200" },
-  { key: "done",        label: "Completed",    icon: CheckCircle2,  color: "text-emerald-600", bg: "bg-emerald-50 border-emerald-200" },
+  { key: "todo",        label: "To Do",       icon: Circle,        color: "text-[#85858D]", bg: "bg-[#FAFAF8] border-[#ECEBE8]" },
+  { key: "in_progress", label: "In Progress",  icon: Loader2,       color: "text-[#24262B]", bg: "bg-[#E5F3FA]/70 border-[#85BBD6]/30" },
+  { key: "review",      label: "In Review",    icon: AlertCircle,   color: "text-[#24262B]", bg: "bg-[#F8E8EF]/70 border-[#D9A7BC]/30" },
+  { key: "done",        label: "Completed",    icon: CheckCircle2,  color: "text-[#638D79]", bg: "bg-[#FAFAF8] border-[#638D79]/30" },
 ];
 
 const PRIORITY_META: Record<string, { cls: string; dot: string; label: string }> = {
-  urgent: { cls: "bg-red-100 text-red-700", dot: "bg-red-500", label: "Urgent" },
-  high:   { cls: "bg-amber-100 text-amber-700", dot: "bg-amber-500", label: "High" },
-  medium: { cls: "bg-blue-100 text-blue-700", dot: "bg-blue-400", label: "Medium" },
-  low:    { cls: "bg-slate-100 text-slate-600", dot: "bg-slate-400", label: "Low" },
+  urgent: { cls: "bg-[#F8E8EF] text-[#24262B] border border-[#D9A7BC]/40", dot: "bg-[#D9A7BC]", label: "Urgent" },
+  high:   { cls: "bg-[#F8E8EF] text-[#24262B] border border-[#D9A7BC]/40", dot: "bg-[#D9A7BC]", label: "High" },
+  medium: { cls: "bg-[#E5F3FA] text-[#24262B] border border-[#85BBD6]/40", dot: "bg-[#85BBD6]", label: "Medium" },
+  low:    { cls: "bg-[#FAFAF8] text-[#85858D] border border-[#ECEBE8]",    dot: "bg-[#85858D]", label: "Low" },
 };
 
 function isOverdue(t: Task) {
@@ -63,10 +63,15 @@ function Tasks({ clientId }: { clientId: string }) {
         subtitle={`${openTasks.length} open · ${done.length} completed`}
         right={
           <div className="flex items-center gap-2">
-            <div className="inline-flex rounded-full border border-border p-0.5">
+            <div className="inline-flex rounded-full border border-[#ECEBE8] bg-white p-0.5">
               {(["board", "list"] as const).map((v) => (
-                <button key={v} onClick={() => setView(v)}
-                  className={`rounded-full px-3 py-1.5 text-xs font-bold transition-colors ${view === v ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}>
+                <button
+                  key={v}
+                  onClick={() => setView(v)}
+                  className={`rounded-full px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    view === v ? "bg-[#E5F3FA] text-[#24262B]" : "text-[#85858D] hover:text-[#24262B]"
+                  }`}
+                >
                   {v === "board" ? <LayoutGrid className="h-3.5 w-3.5" /> : <List className="h-3.5 w-3.5" />}
                 </button>
               ))}
@@ -78,14 +83,17 @@ function Tasks({ clientId }: { clientId: string }) {
       {/* Summary cards */}
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4 mb-6">
         {[
-          { label: "Open Tasks", val: openTasks.length, icon: ListChecks, bg: "bg-indigo-50 border-indigo-200 text-indigo-700" },
-          { label: "Overdue", val: overdue.length, icon: Clock, bg: overdue.length > 0 ? "bg-red-50 border-red-200 text-red-700" : "bg-slate-50 border-slate-200 text-slate-600" },
-          { label: "In Progress", val: rows.filter((t) => t.status === "in_progress").length, icon: Loader2, bg: "bg-blue-50 border-blue-200 text-blue-700" },
-          { label: "Completed", val: done.length, icon: CheckCircle2, bg: "bg-emerald-50 border-emerald-200 text-emerald-700" },
+          { label: "Open Tasks", val: openTasks.length, icon: ListChecks, bg: "bg-[#E5F3FA] border-[#85BBD6]/30 text-[#24262B]" },
+          { label: "Overdue", val: overdue.length, icon: Clock, bg: overdue.length > 0 ? "bg-[#F8E8EF] border-[#D9A7BC]/30 text-[#24262B]" : "bg-[#FAFAF8] border-[#ECEBE8] text-[#85858D]" },
+          { label: "In Progress", val: rows.filter((t) => t.status === "in_progress").length, icon: Loader2, bg: "bg-[#E5F3FA] border-[#85BBD6]/30 text-[#24262B]" },
+          { label: "Completed", val: done.length, icon: CheckCircle2, bg: "bg-[#FAFAF8] border-[#638D79]/30 text-[#638D79]" },
         ].map(({ label, val, icon: Icon, bg }) => (
-          <div key={label} className={`flex items-center gap-3 rounded-2xl border p-4 ${bg}`}>
-            <Icon className="h-6 w-6 shrink-0 opacity-70" />
-            <div><p className="text-xl font-black">{val}</p><p className="text-[10px] font-semibold uppercase tracking-widest">{label}</p></div>
+          <div key={label} className={`flex items-center gap-3 rounded-2xl border p-4 shadow-xs ${bg}`}>
+            <Icon className="h-6 w-6 shrink-0 opacity-80" />
+            <div>
+              <p className="text-xl font-bold font-heading">{val}</p>
+              <p className="text-[10px] font-semibold uppercase tracking-wider">{label}</p>
+            </div>
           </div>
         ))}
       </div>

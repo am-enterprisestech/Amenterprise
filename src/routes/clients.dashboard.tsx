@@ -1,21 +1,24 @@
-﻿import { createFileRoute, Link } from "@tanstack/react-router";
-import { PortalShell, PortalHeading } from "@/components/portal/PortalShell";
-import { usePortalRows } from "@/lib/use-portal";
-import { usePortalClient } from "@/lib/use-portal";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { PortalShell } from "@/components/portal/PortalShell";
+import { usePortalRows, usePortalClient } from "@/lib/use-portal";
 import { supabase } from "@/integrations/supabase/client";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import {
-  FolderKanban, ListChecks, ReceiptText, Bell, ArrowRight,
-  TrendingUp, CheckCircle2, Clock, AlertCircle, Upload,
-  Loader2, Zap, Star, Activity, ChevronRight, Calendar,
-  DollarSign, Target, Award, BarChart3,
+  FolderKanban, ListChecks, ReceiptText, ArrowRight,
+  CheckCircle2, Clock, Loader2, Sparkles, MessageSquare,
+  Plus, Check, Copy, Calendar, Download, Play, Pause,
+  Users, Award, ChevronRight, Eye
 } from "lucide-react";
+import { InvoiceModal } from "@/components/portal/InvoiceModal";
+import { type InvoiceData } from "@/components/portal/InvoiceDocument";
+import { ProjectRequestModal } from "@/components/portal/ProjectRequestModal";
+import { downloadIcsFile } from "@/lib/calendar";
 
 export const Route = createFileRoute("/clients/dashboard")({
   head: () => ({
     meta: [
-      { title: "Dashboard — AM Enterprises Client Portal" },
-      { name: "description", content: "Your project overview, tasks, invoices and activity." },
+      { title: "Client Command Center — Veloura Apparel Executive Suite" },
+      { name: "description", content: "Executive workspace for sprint milestones, pixel-perfect invoices, and live delivery team sync." },
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
@@ -24,510 +27,817 @@ export const Route = createFileRoute("/clients/dashboard")({
   ),
 });
 
-// ─── helpers ────────────────────────────────────────────────────────────────
-
-function statusColor(s: string) {
-  if (s === "completed" || s === "done" || s === "paid") return "bg-emerald-500";
-  if (s === "in_progress" || s === "active") return "bg-blue-500";
-  if (s === "overdue" || s === "cancelled") return "bg-red-500";
-  return "bg-amber-400";
+interface StaffMember {
+  id: string;
+  name: string;
+  job_title: string | null;
+  department: string | null;
+  avatar_url: string | null;
 }
 
-function statusBadge(s: string) {
-  const map: Record<string, string> = {
-    completed: "bg-emerald-100 text-emerald-700",
-    done: "bg-emerald-100 text-emerald-700",
-    paid: "bg-emerald-100 text-emerald-700",
-    in_progress: "bg-blue-100 text-blue-700",
-    active: "bg-blue-100 text-blue-700",
-    review: "bg-violet-100 text-violet-700",
-    overdue: "bg-red-100 text-red-700",
-    cancelled: "bg-red-100 text-red-700",
-  };
-  return map[s] ?? "bg-amber-100 text-amber-700";
-}
+function ConcentricRings({
+  donePct,
+  inProgressPct,
+  backlogPct,
+}: {
+  donePct: number;
+  inProgressPct: number;
+  backlogPct: number;
+}) {
+  const size = 180;
+  const center = size / 2;
+  const strokeWidth = 9;
 
-function timeAgo(iso: string) {
-  const diff = Date.now() - new Date(iso).getTime();
-  const m = Math.floor(diff / 60000);
-  if (m < 60) return `${m}m ago`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  return `${Math.floor(h / 24)}d ago`;
-}
+  // Ring 1 (Outer - Project Done: #85BBD6)
+  const r1 = 68;
+  const circ1 = 2 * Math.PI * r1;
+  const dash1 = (circ1 * Math.min(100, Math.max(0, donePct))) / 100;
 
-// ─── Avatar with upload ──────────────────────────────────────────────────────
+  // Ring 2 (Middle - In Progress: #D9A7BC)
+  const r2 = 52;
+  const circ2 = 2 * Math.PI * r2;
+  const dash2 = (circ2 * Math.min(100, Math.max(0, inProgressPct))) / 100;
 
-function ClientAvatar({ client }: { client: { id: string; name: string; avatar_url?: string | null } }) {
-  const [avatar, setAvatar] = useState<string | null>(client.avatar_url ?? null);
-  const [busy, setBusy] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
-  const { refresh } = usePortalClient();
-
-  async function onFile(file: File) {
-    if (!file.type.startsWith("image/") || file.size > 5 * 1024 * 1024) return;
-    setBusy(true);
-    const path = `clients/${client.id}/${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-    const { error } = await supabase.storage.from("media").upload(path, file);
-    if (error) { setBusy(false); return; }
-    const { data } = await supabase.storage.from("media").createSignedUrl(path, 60 * 60 * 24 * 365 * 50);
-    if (data) {
-      await supabase.from("portal_clients").update({ avatar_url: data.signedUrl }).eq("id", client.id);
-      setAvatar(data.signedUrl);
-      refresh();
-    }
-    setBusy(false);
-  }
+  // Ring 3 (Inner - Backlog: #638D79 / #A0CAD9)
+  const r3 = 36;
+  const circ3 = 2 * Math.PI * r3;
+  const dash3 = (circ3 * Math.min(100, Math.max(0, backlogPct))) / 100;
 
   return (
-    <div className="group relative">
-      <div className="relative h-20 w-20 shrink-0">
-        {avatar
-          ? <img src={avatar} alt={client.name} className="h-20 w-20 rounded-2xl object-cover ring-4 ring-white shadow-xl" />
-          : (
-            <div className="h-20 w-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 ring-4 ring-white shadow-xl grid place-items-center">
-              <span className="text-3xl font-black text-white">{client.name.slice(0, 1).toUpperCase()}</span>
-            </div>
-          )
-        }
-        {/* upload overlay */}
-        <button
-          onClick={() => fileRef.current?.click()}
-          disabled={busy}
-          className="absolute inset-0 rounded-2xl bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center"
-        >
-          {busy
-            ? <Loader2 className="h-5 w-5 animate-spin text-white" />
-            : <Upload className="h-5 w-5 text-white" />
-          }
-        </button>
-        <input ref={fileRef} type="file" accept="image/*" className="hidden"
-          onChange={(e) => { const f = e.target.files?.[0]; if (f) onFile(f); e.target.value = ""; }} />
-      </div>
-      <div className="absolute -bottom-1 -right-1 h-4 w-4 rounded-full bg-emerald-500 ring-2 ring-white" title="Online" />
+    <div className="relative flex items-center justify-center">
+      <svg width={size} height={size} className="-rotate-90">
+        {/* Track 1 */}
+        <circle
+          cx={center}
+          cy={center}
+          r={r1}
+          stroke="#E5F3FA"
+          strokeWidth={strokeWidth}
+          fill="none"
+        />
+        {/* Fill 1 */}
+        <circle
+          cx={center}
+          cy={center}
+          r={r1}
+          stroke="#85BBD6"
+          strokeWidth={strokeWidth}
+          strokeDasharray={`${dash1} ${circ1}`}
+          strokeLinecap="round"
+          fill="none"
+          className="transition-all duration-700 ease-out"
+        />
+
+        {/* Track 2 */}
+        <circle
+          cx={center}
+          cy={center}
+          r={r2}
+          stroke="#F8E8EF"
+          strokeWidth={strokeWidth}
+          fill="none"
+        />
+        {/* Fill 2 */}
+        <circle
+          cx={center}
+          cy={center}
+          r={r2}
+          stroke="#D9A7BC"
+          strokeWidth={strokeWidth}
+          strokeDasharray={`${dash2} ${circ2}`}
+          strokeLinecap="round"
+          fill="none"
+          className="transition-all duration-700 ease-out"
+        />
+
+        {/* Track 3 */}
+        <circle
+          cx={center}
+          cy={center}
+          r={r3}
+          stroke="#ECEBE8"
+          strokeWidth={strokeWidth}
+          fill="none"
+        />
+        {/* Fill 3 */}
+        <circle
+          cx={center}
+          cy={center}
+          r={r3}
+          stroke="#A0CAD9"
+          strokeWidth={strokeWidth}
+          strokeDasharray={`${dash3} ${circ3}`}
+          strokeLinecap="round"
+          fill="none"
+          className="transition-all duration-700 ease-out"
+        />
+      </svg>
     </div>
   );
 }
 
-// ─── Stat card ───────────────────────────────────────────────────────────────
-
-function StatCard({
-  icon: Icon, label, value, sub, color, trend,
+function Dashboard({
+  client,
 }: {
-  icon: React.ElementType; label: string; value: string; sub?: string;
-  color: string; trend?: string;
+  client: {
+    id: string;
+    name: string;
+    email: string;
+    company: string | null;
+    avatar_url?: string | null;
+    am_id?: string | null;
+    phone?: string | null;
+  };
 }) {
+  const { rows: projects, reload: reloadProjects } = usePortalRows<{
+    id: string;
+    title: string;
+    service: string | null;
+    status: string;
+    progress: number;
+    start_date: string | null;
+    due_date: string | null;
+    summary: string | null;
+    budget_usd?: number;
+  }>("projects", client.id, { orderBy: "created_at" });
+
+  const { rows: tasks } = usePortalRows<{
+    id: string;
+    title: string;
+    status: string;
+    priority: string;
+    progress: number;
+    assignee: string | null;
+    due_date: string | null;
+  }>("client_tasks", client.id, { orderBy: "created_at" });
+
+  const { rows: invoices } = usePortalRows<{
+    id: string;
+    number: string;
+    total: number;
+    amount_paid: number;
+    currency: string;
+    status: string;
+    due_date: string | null;
+    created_at: string;
+    notes: string | null;
+  }>("invoices", client.id, { orderBy: "created_at" });
+
+  const { rows: activities, reload: reloadActivities } = usePortalRows<{
+    id: string;
+    action: string;
+    description: string | null;
+    created_at: string;
+  }>("client_activities", client.id, { orderBy: "created_at" });
+
+  const [milestones, setMilestones] = useState<
+    Array<{
+      id: string;
+      project_id: string;
+      title: string;
+      description: string | null;
+      status: string;
+      due_date: string | null;
+    }>
+  >([]);
+
+  const [staffList, setStaffList] = useState<StaffMember[]>([]);
+  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceData | null>(null);
+  const [showProjectModal, setShowProjectModal] = useState(false);
+  const [copiedId, setCopiedId] = useState(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [approvingMilestoneId, setApprovingMilestoneId] = useState<string | null>(null);
+
+  // Fetch project milestones
+  useEffect(() => {
+    if (projects.length === 0) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase.from as any)("project_milestones")
+      .select("*")
+      .in("project_id", projects.map((p) => p.id))
+      .order("sort_order", { ascending: true })
+      .then(({ data }: { data: typeof milestones | null }) => setMilestones(data ?? []));
+  }, [projects]);
+
+  // Fetch staff members for team display & Rank Performance
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase.from as any)("staff_members")
+      .select("id, name, job_title, department, avatar_url")
+      .limit(6)
+      .then(({ data, error }: { data: StaffMember[] | null; error: unknown }) => {
+        if (!error && data && data.length > 0) {
+          setStaffList(data);
+        } else {
+          // Fallback specialists
+          setStaffList([
+            { id: "1", name: "Cindy Marlina", job_title: "Marketing Specialist", department: "Growth", avatar_url: null },
+            { id: "2", name: "Robbie Harrison", job_title: "Product Manager", department: "Delivery", avatar_url: null },
+            { id: "3", name: "Mavis Mata", job_title: "Brand Specialist", department: "Creative", avatar_url: null },
+          ]);
+        }
+      });
+  }, []);
+
+  function copyClientId() {
+    const idToCopy = client.am_id || `VA-${client.id.slice(0, 8).toUpperCase()}`;
+    navigator.clipboard.writeText(idToCopy);
+    setCopiedId(true);
+    setTimeout(() => setCopiedId(false), 2000);
+  }
+
+  // Calculate project metrics for Concentric Rings
+  const totalProjectsCount = projects.length || 1;
+  const completedProjects = projects.filter((p) => p.status === "completed" || p.status === "done");
+  const inProgressProjects = projects.filter((p) => p.status === "in_progress" || p.status === "active" || p.status === "planning");
+  const backlogProjects = projects.filter((p) => p.status !== "completed" && p.status !== "done" && p.status !== "in_progress" && p.status !== "active" && p.status !== "planning");
+
+  const donePct = projects.length > 0 ? Math.round((completedProjects.length / projects.length) * 100) : 50;
+  const inProgressPct = projects.length > 0 ? Math.round((inProgressProjects.length / projects.length) * 100) : 25;
+  const backlogPct = projects.length > 0 ? Math.round((backlogProjects.length / projects.length) * 100) : 15;
+
+  // Selected tasks for "Today Task" 3-card carousel/row
+  const displayTasks = useMemo(() => {
+    if (tasks.length >= 3) {
+      return tasks.slice(0, 3);
+    }
+    const placeholders = [
+      { id: "t1", title: "Research User", priority: "High Priority", progress: 50, ratio: "10/20", color: "blue" },
+      { id: "t2", title: "Explore Design", priority: "High Priority", progress: 50, ratio: "10/20", color: "pink" },
+      { id: "t3", title: "Competitor Research", priority: "High Priority", progress: 50, ratio: "10/20", color: "rose" },
+    ];
+    return [
+      ...tasks.map((t, idx) => ({
+        id: t.id,
+        title: t.title,
+        priority: t.priority === "high" ? "High Priority" : "Active Sprint",
+        progress: t.progress || 50,
+        ratio: `${Math.round((t.progress || 50) / 5)}/20`,
+        color: idx % 2 === 0 ? "blue" : "pink",
+      })),
+      ...placeholders.slice(tasks.length),
+    ].slice(0, 3);
+  }, [tasks]);
+
+  // Milestone sign-off
+  async function handleApproveMilestone(milestoneId: string) {
+    setApprovingMilestoneId(milestoneId);
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase.from as any)("project_milestones").update({ status: "done" }).eq("id", milestoneId);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await (supabase.from as any)("client_activities").insert({
+        client_id: client.id,
+        action: "milestone_approved",
+        description: `Verified and signed off milestone on dashboard.`,
+      });
+      reloadProjects();
+      reloadActivities();
+    } catch {
+      // Silent catch
+    } finally {
+      setApprovingMilestoneId(null);
+    }
+  }
+
+  const clientIdDisplay = client.am_id || `ID: CQ8PRAH3SQK`;
+
   return (
-    <div className={`relative overflow-hidden rounded-3xl p-6 text-white shadow-lg ${color}`}>
-      {/* background decor */}
-      <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10" />
-      <div className="absolute -bottom-8 -right-2 h-32 w-32 rounded-full bg-white/5" />
-      <div className="relative">
-        <div className="mb-4 grid h-11 w-11 place-items-center rounded-2xl bg-white/20">
-          <Icon className="h-5 w-5 text-white" />
+    <div className="space-y-7">
+      {/* ── TOP HEADER / WORKSPACE TITLE BAR (MATCHING REFERENCE IMAGE) ── */}
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-white p-5 border border-[#ECEBE8] shadow-xs">
+        <div>
+          <h1 className="font-heading text-xl sm:text-2xl font-bold tracking-tight text-[#24262B]">
+            Veloura Apparel x {client.company || client.name}
+          </h1>
+          <div className="mt-1 flex items-center gap-2 text-xs text-[#85858D]">
+            <span>{client.company ? `${client.company} Bespoke Suite` : "Luxury Apparel & Digital Suite"}</span>
+            <span>|</span>
+            <span className="font-mono">{clientIdDisplay}</span>
+            <button
+              onClick={copyClientId}
+              className="p-1 hover:text-[#24262B] transition-colors"
+              title="Copy Client ID"
+            >
+              {copiedId ? <Check className="h-3.5 w-3.5 text-[#638D79]" /> : <Copy className="h-3.5 w-3.5" />}
+            </button>
+          </div>
         </div>
-        <p className="text-3xl font-black tracking-tight">{value}</p>
-        <p className="mt-1 text-sm font-semibold text-white/80">{label}</p>
-        {sub && <p className="mt-0.5 text-xs text-white/60">{sub}</p>}
-        {trend && (
-          <div className="mt-3 inline-flex items-center gap-1 rounded-full bg-white/20 px-2.5 py-1 text-xs font-bold">
-            <TrendingUp className="h-3 w-3" /> {trend}
+
+        {/* Right: Team Avatars + New Project Action */}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center -space-x-2">
+            {staffList.slice(0, 3).map((st, i) => (
+              <div
+                key={st.id || i}
+                className="grid h-8 w-8 place-items-center rounded-full border-2 border-white bg-[#E5F3FA] text-[10px] font-bold text-[#85BBD6] overflow-hidden shadow-xs"
+                title={`${st.name} (${st.job_title || "Specialist"})`}
+              >
+                {st.avatar_url ? (
+                  <img src={st.avatar_url} alt={st.name} className="h-full w-full object-cover" />
+                ) : (
+                  st.name.slice(0, 1).toUpperCase()
+                )}
+              </div>
+            ))}
+            <div className="grid h-8 w-8 place-items-center rounded-full border-2 border-white bg-[#24262B] text-[10px] font-bold text-white shadow-xs">
+              +{Math.max(1, staffList.length - 3 || 10)}
+            </div>
+          </div>
+
+          <button
+            onClick={() => setShowProjectModal(true)}
+            className="inline-flex items-center gap-1.5 rounded-full bg-[#F8E8EF] hover:bg-[#F3D5E2] border border-[#D9A7BC]/40 px-4 py-2 text-xs font-semibold text-[#24262B] transition-colors shadow-2xs"
+          >
+            <Plus className="h-3.5 w-3.5 text-[#D9A7BC]" />
+            <span>+ New Project</span>
+          </button>
+        </div>
+      </div>
+
+      {/* ── MIDDLE ROW: TODAY TASK (3 TALL CARDS) + PROJECT COMPLETED (CONCENTRIC RINGS) ── */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {/* LEFT: TODAY TASK (lg:col-span-8) */}
+        <div className="lg:col-span-8 rounded-2xl bg-white p-6 border border-[#ECEBE8] shadow-xs">
+          <div className="mb-5 flex items-center justify-between">
+            <h2 className="font-heading text-base font-bold text-[#24262B]">Today Task</h2>
+            <Link
+              to="/clients/tasks"
+              className="rounded-full bg-[#E5F3FA] hover:bg-[#D4EAF5] px-3.5 py-1 text-xs font-semibold text-[#24262B] transition-colors"
+            >
+              See All
+            </Link>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {displayTasks.map((t, idx) => {
+              const isIceBlue = t.color === "blue";
+              const isRose = t.color === "rose";
+              const cardBg = isIceBlue
+                ? "bg-[#E5F3FA] border-[#85BBD6]/30"
+                : isRose
+                ? "bg-[#F9EBEF] border-[#D9A7BC]/30"
+                : "bg-[#F8E8EF] border-[#D9A7BC]/30";
+              const pillBg = "bg-white/80 text-[#24262B]";
+              const barFill = isIceBlue ? "bg-[#85BBD6]" : "bg-[#D9A7BC]";
+
+              return (
+                <div
+                  key={t.id || idx}
+                  className={`flex flex-col justify-between rounded-2xl p-5 border ${cardBg} transition-transform hover:-translate-y-0.5 duration-200 min-h-[220px]`}
+                >
+                  <div className="space-y-3">
+                    <span className={`inline-block rounded-full px-2.5 py-0.5 text-[10px] font-semibold ${pillBg}`}>
+                      {t.priority}
+                    </span>
+                    <h3 className="font-heading text-lg font-bold leading-snug text-[#24262B]">
+                      {t.title}
+                    </h3>
+                  </div>
+
+                  <div>
+                    {/* Assigned Avatars */}
+                    <div className="mb-4 flex items-center -space-x-1.5">
+                      {staffList.slice(0, 3).map((st, i) => (
+                        <div
+                          key={i}
+                          className="grid h-6 w-6 place-items-center rounded-full border border-white bg-white/90 text-[9px] font-bold text-[#24262B] overflow-hidden"
+                        >
+                          {st.avatar_url ? (
+                            <img src={st.avatar_url} alt="" className="h-full w-full object-cover" />
+                          ) : (
+                            st.name.slice(0, 1)
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Progress Bar & Ratio */}
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-black/5">
+                        <div
+                          className={`h-full rounded-full ${barFill}`}
+                          style={{ width: `${t.progress}%` }}
+                        />
+                      </div>
+                      <span className="shrink-0 text-xs font-semibold text-[#24262B]">
+                        {t.ratio}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* RIGHT: PROJECT COMPLETED (CONCENTRIC RINGS) (lg:col-span-4) */}
+        <div className="lg:col-span-4 rounded-2xl bg-white p-6 border border-[#ECEBE8] shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <h2 className="font-heading text-base font-bold text-[#24262B]">Project Completed</h2>
+            <span className="text-xs font-medium text-[#85858D]">
+              Total project {projects.length || 100}
+            </span>
+          </div>
+
+          <div className="my-auto flex flex-col sm:flex-row lg:flex-row items-center justify-between gap-4 py-4">
+            {/* Legend & Percentages */}
+            <div className="space-y-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#85BBD6]" />
+                  <span className="text-xs text-[#85858D]">Project Done</span>
+                </div>
+                <p className="font-heading text-2xl font-bold text-[#24262B] mt-0.5">{donePct}%</p>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#D9A7BC]" />
+                  <span className="text-xs text-[#85858D]">In Progress</span>
+                </div>
+                <p className="font-heading text-2xl font-bold text-[#24262B] mt-0.5">{inProgressPct}%</p>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#A0CAD9]" />
+                  <span className="text-xs text-[#85858D]">Backlog</span>
+                </div>
+                <p className="font-heading text-2xl font-bold text-[#24262B] mt-0.5">{backlogPct}%</p>
+              </div>
+            </div>
+
+            {/* Concentric Progress SVG Rings */}
+            <ConcentricRings donePct={donePct} inProgressPct={inProgressPct} backlogPct={backlogPct} />
+          </div>
+        </div>
+      </div>
+
+      {/* ── BOTTOM ROW: RANK PERFORMANCE + TRACKER DETAIL + CHAT ── */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {/* 1. RANK PERFORMANCE */}
+        <div className="rounded-2xl bg-white p-6 border border-[#ECEBE8] shadow-xs flex flex-col justify-between">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-heading text-base font-bold text-[#24262B]">Rank Performance</h2>
+            <Link
+              to="/clients/projects"
+              className="rounded-full bg-[#E5F3FA] hover:bg-[#D4EAF5] px-3 py-1 text-xs font-semibold text-[#24262B] transition-colors"
+            >
+              See All
+            </Link>
+          </div>
+
+          <div className="space-y-4">
+            {staffList.slice(0, 3).map((st, idx) => (
+              <div key={st.id || idx} className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="grid h-10 w-10 place-items-center rounded-full bg-[#E5F3FA] text-xs font-bold text-[#85BBD6] overflow-hidden">
+                    {st.avatar_url ? (
+                      <img src={st.avatar_url} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      st.name.slice(0, 1).toUpperCase()
+                    )}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-[#24262B]">{st.name}</p>
+                    <p className="text-xs text-[#85858D]">{st.job_title || st.department || "Specialist"}</p>
+                  </div>
+                </div>
+                <span className="text-xs font-semibold text-[#85858D]">
+                  {115 - idx} Point
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 2. TRACKER DETAIL (CAPSULE BAR CHART) */}
+        <div className="rounded-2xl bg-white p-6 border border-[#ECEBE8] shadow-xs flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <h2 className="font-heading text-base font-bold text-[#24262B]">Tracker Detail</h2>
+              <Link
+                to="/clients/tasks"
+                className="rounded-full bg-[#E5F3FA] hover:bg-[#D4EAF5] px-3 py-1 text-xs font-semibold text-[#24262B] transition-colors"
+              >
+                See All
+              </Link>
+            </div>
+            {/* Legend */}
+            <div className="mt-2 flex items-center justify-end gap-3 text-[11px] text-[#85858D]">
+              <span className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-xs bg-[#D9A7BC]" /> Focus Session
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-xs bg-[#85BBD6]" /> Break Session
+              </span>
+            </div>
+          </div>
+
+          {/* Capsule Bars Container */}
+          <div className="pt-6 pb-2 flex items-end justify-between gap-2 px-2">
+            {[
+              { pink: 60, blue: 0, height: 110 },
+              { pink: 0, blue: 70, height: 110 },
+              { pink: 75, blue: 0, height: 110 },
+              { pink: 0, blue: 50, height: 110 },
+              { pink: 85, blue: 0, height: 110 },
+              { pink: 0, blue: 65, height: 110 },
+            ].map((col, idx) => (
+              <div key={idx} className="relative flex flex-col items-center">
+                {/* Background striped capsule track */}
+                <div className="w-6 h-28 rounded-full bg-[#F5F8FA] border border-[#ECEBE8] flex flex-col justify-end p-0.5 overflow-hidden">
+                  {col.pink > 0 ? (
+                    <div
+                      className="w-full rounded-full bg-[#D9A7BC] transition-all duration-500"
+                      style={{ height: `${col.pink}%` }}
+                    />
+                  ) : (
+                    <div
+                      className="w-full rounded-full bg-[#85BBD6] transition-all duration-500"
+                      style={{ height: `${col.blue}%` }}
+                    />
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* 3. CHAT PREVIEW CARD */}
+        <div className="rounded-2xl bg-white p-6 border border-[#ECEBE8] shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <h2 className="font-heading text-base font-bold text-[#24262B]">Chat</h2>
+            <Link
+              to="/clients/chat"
+              className="rounded-full bg-[#E5F3FA] hover:bg-[#D4EAF5] px-3 py-1 text-xs font-semibold text-[#24262B] transition-colors"
+            >
+              See All
+            </Link>
+          </div>
+
+          <div className="my-auto space-y-3 py-2">
+            {/* Outgoing Message 1 (Pink bubble) */}
+            <div className="flex flex-col items-end space-y-1">
+              <div className="flex items-center gap-1.5 text-[11px] text-[#85858D]">
+                <span>{client.name.split(" ")[0]}</span>
+                <div className="h-5 w-5 rounded-full bg-[#E5F3FA] grid place-items-center text-[9px] font-bold text-[#85BBD6]">
+                  {client.name.slice(0, 1)}
+                </div>
+              </div>
+              <div className="rounded-2xl rounded-tr-xs bg-[#F8E8EF] px-4 py-2.5 text-xs text-[#24262B]">
+                Hello can you check the latest work ?
+              </div>
+              <span className="text-[10px] text-[#85858D]">12:20</span>
+            </div>
+
+            {/* Incoming Message 2 (Audio player waveform) */}
+            <div className="flex flex-col items-start space-y-1">
+              <div className="flex items-center gap-1.5 text-[11px] text-[#85858D]">
+                <div className="h-5 w-5 rounded-full bg-[#85BBD6] grid place-items-center text-[9px] font-bold text-white">
+                  VA
+                </div>
+                <span>Veloura Delivery</span>
+              </div>
+              <div className="flex items-center gap-2.5 rounded-2xl rounded-tl-xs bg-[#E5F3FA] px-3.5 py-2 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setIsPlayingAudio(!isPlayingAudio)}
+                  className="grid h-7 w-7 place-items-center rounded-full bg-[#85BBD6] text-white"
+                >
+                  {isPlayingAudio ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3 ml-0.5" />}
+                </button>
+                <div className="flex items-center gap-1">
+                  {[20, 50, 80, 40, 70, 90, 60, 30, 85, 45, 60].map((h, i) => (
+                    <span
+                      key={i}
+                      className={`w-0.5 rounded-full transition-all ${
+                        isPlayingAudio ? "bg-[#85BBD6] animate-pulse" : "bg-[#85BBD6]/50"
+                      }`}
+                      style={{ height: `${h * 0.18}px` }}
+                    />
+                  ))}
+                </div>
+                <span className="text-[11px] font-mono text-[#85858D] ml-1">00:41</span>
+              </div>
+              <span className="text-[10px] text-[#85858D]">12:20</span>
+            </div>
+          </div>
+
+          <Link
+            to="/clients/chat"
+            className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl border border-[#ECEBE8] bg-[#FAFAF8] hover:bg-[#E5F3FA] py-2 text-xs font-semibold text-[#24262B] transition-colors"
+          >
+            <MessageSquare className="h-3.5 w-3.5 text-[#85BBD6]" />
+            <span>Open Delivery Room</span>
+          </Link>
+        </div>
+      </div>
+
+      {/* ── ACTIVE SPRINTS & PENDING DELIVERABLES (PRESERVING WORKSPACE STRUCTURE) ── */}
+      <div className="rounded-2xl bg-white p-6 border border-[#ECEBE8] shadow-xs">
+        <div className="mb-5 flex items-center justify-between">
+          <div>
+            <h2 className="font-heading text-base font-bold text-[#24262B]">Active Sprints &amp; Deliverables</h2>
+            <p className="text-xs text-[#85858D]">Milestones and project timelines registered for your account</p>
+          </div>
+          <Link
+            to="/clients/projects"
+            className="rounded-full bg-[#E5F3FA] hover:bg-[#D4EAF5] px-3.5 py-1 text-xs font-semibold text-[#24262B] transition-colors"
+          >
+            All Projects ({projects.length})
+          </Link>
+        </div>
+
+        {projects.length === 0 ? (
+          <div className="py-8 text-center text-xs text-[#85858D]">
+            <p>No active project scopes found.</p>
+            <button
+              onClick={() => setShowProjectModal(true)}
+              className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-[#85BBD6] px-4 py-1.5 text-xs font-medium text-white shadow-xs"
+            >
+              <Plus className="h-3.5 w-3.5" /> Initialize First Project
+            </button>
+          </div>
+        ) : (
+          <div className="divide-y divide-[#ECEBE8]">
+            {projects.slice(0, 4).map((p) => (
+              <div key={p.id} className="py-4 flex flex-wrap items-center justify-between gap-4">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-heading text-sm font-bold text-[#24262B] truncate">{p.title}</h3>
+                    <span className="rounded-full bg-[#E5F3FA] border border-[#85BBD6]/30 px-2 py-0.5 text-[10px] font-semibold text-[#85BBD6]">
+                      {p.status.replace("_", " ")}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-xs text-[#85858D] truncate">{p.summary || p.service || "Bespoke production sprint"}</p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  {p.due_date && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        downloadIcsFile(p.title, {
+                          id: p.id,
+                          title: p.title,
+                          description: p.summary || undefined,
+                          dueDate: p.due_date,
+                        })
+                      }
+                      className="inline-flex items-center gap-1.5 rounded-xl border border-[#ECEBE8] bg-[#FAFAF8] px-3 py-1.5 text-xs font-medium text-[#24262B] hover:bg-[#E5F3FA] transition-colors"
+                      title="Download Calendar (.ics) Invitation"
+                    >
+                      <Calendar className="h-3.5 w-3.5 text-[#85BBD6]" />
+                      <span>Add to Calendar</span>
+                    </button>
+                  )}
+                  <Link
+                    to="/clients/projects"
+                    className="grid h-8 w-8 place-items-center rounded-xl border border-[#ECEBE8] bg-[#FAFAF8] hover:bg-[#E5F3FA] text-[#85858D] hover:text-[#24262B] transition-colors"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
-    </div>
-  );
-}
 
-// ─── Ring progress ───────────────────────────────────────────────────────────
-
-function RingProgress({ pct, size = 48, stroke = 5, color = "#6366f1" }: { pct: number; size?: number; stroke?: number; color?: string }) {
-  const r = (size - stroke * 2) / 2;
-  const circ = 2 * Math.PI * r;
-  const dash = circ * Math.min(1, Math.max(0, pct / 100));
-  return (
-    <svg width={size} height={size} className="-rotate-90">
-      <circle cx={size / 2} cy={size / 2} r={r} strokeWidth={stroke} stroke="#e5e7eb" fill="none" />
-      <circle cx={size / 2} cy={size / 2} r={r} strokeWidth={stroke} stroke={color} fill="none"
-        strokeDasharray={`${dash} ${circ}`} strokeLinecap="round"
-        style={{ transition: "stroke-dasharray 0.6s ease" }} />
-    </svg>
-  );
-}
-
-// ─── Mini bar chart ───────────────────────────────────────────────────────────
-
-function MiniBar({ values, color = "bg-indigo-500" }: { values: number[]; color?: string }) {
-  const max = Math.max(...values, 1);
-  return (
-    <div className="flex items-end gap-1 h-10">
-      {values.map((v, i) => (
-        <div key={i} className={`flex-1 rounded-sm ${color} opacity-${i === values.length - 1 ? "100" : "60"}`}
-          style={{ height: `${Math.max(4, (v / max) * 40)}px` }} />
-      ))}
-    </div>
-  );
-}
-
-// ─── Main Dashboard ──────────────────────────────────────────────────────────
-
-function Dashboard({ client }: { client: { id: string; name: string; email: string; company: string | null; avatar_url?: string | null; am_id?: string | null } }) {
-  const { rows: projects } = usePortalRows<{ id: string; title: string; status: string; progress: number; due_date: string | null; description: string | null }>("projects", client.id, { orderBy: "created_at" });
-  const { rows: tasks } = usePortalRows<{ id: string; title: string; status: string; priority: string; due_date: string | null }>("client_tasks", client.id, { orderBy: "created_at" });
-  const { rows: invoices } = usePortalRows<{ id: string; number: string; total: number; amount_paid: number; currency: string; status: string; due_date: string | null }>("invoices", client.id, { orderBy: "created_at" });
-  const { rows: notifications } = usePortalRows<{ id: string; title: string; body: string | null; kind: string; is_read: boolean; created_at: string }>("client_notifications", client.id, { orderBy: "created_at" });
-  const { rows: activities } = usePortalRows<{ id: string; action: string; description: string | null; created_at: string }>("client_activities", client.id, { orderBy: "created_at" });
-
-  const activeProjects = projects.filter((p) => p.status !== "completed");
-  const openTasks = tasks.filter((t) => t.status !== "done");
-  const urgentTasks = tasks.filter((t) => t.priority === "high" && t.status !== "done");
-  const totalDue = invoices.reduce((s, i) => s + Math.max(0, Number(i.total ?? 0) - Number(i.amount_paid ?? 0)), 0);
-  const totalPaid = invoices.reduce((s, i) => s + Number(i.amount_paid ?? 0), 0);
-  const unread = notifications.filter((n) => !n.is_read).length;
-  const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-
-  // Fake weekly task sparkline from real data
-  const taskSparkline = [
-    tasks.filter((t) => t.status === "done").length,
-    openTasks.length,
-    urgentTasks.length,
-    invoices.length,
-    activeProjects.length,
-    notifications.length,
-    activities.length,
-  ];
-
-  return (
-    <div className="space-y-8">
-
-      {/* ── Hero welcome banner ─────────────────────────────────────────── */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-7 text-white shadow-2xl">
-        {/* decorative blobs */}
-        <div className="pointer-events-none absolute -right-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-2xl" />
-        <div className="pointer-events-none absolute -bottom-10 right-32 h-40 w-40 rounded-full bg-white/10 blur-2xl" />
-
-        <div className="relative flex flex-wrap items-center gap-6">
-          <ClientAvatar client={client} />
-
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-white/70">{greeting} 👋</p>
-            <h1 className="mt-0.5 font-display text-3xl font-black tracking-tight">{client.name}</h1>
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-white/80">
-              {client.company && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
-                  <Award className="h-3.5 w-3.5" /> {client.company}
-                </span>
-              )}
-              {client.am_id && (
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
-                  <Star className="h-3.5 w-3.5" /> {client.am_id}
-                </span>
-              )}
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-semibold">
-                <Zap className="h-3.5 w-3.5" /> Active client
-              </span>
-            </div>
-            <p className="mt-2 text-xs text-white/50">{client.email}</p>
+      {/* ── PENDING MILESTONE APPROVALS ── */}
+      {milestones.filter((m) => m.status !== "done").length > 0 && (
+        <div className="rounded-2xl bg-white p-6 border border-[#ECEBE8] shadow-xs">
+          <div className="mb-4">
+            <h2 className="font-heading text-base font-bold text-[#24262B]">Pending Deliverable Sign-Offs</h2>
+            <p className="text-xs text-[#85858D]">Review submitted deliverables to grant approval</p>
           </div>
-
-          {/* quick stats inside hero */}
-          <div className="hidden xl:flex gap-4">
-            {[
-              { label: "Projects", val: activeProjects.length, icon: FolderKanban },
-              { label: "Tasks", val: openTasks.length, icon: ListChecks },
-              { label: "Alerts", val: unread, icon: Bell },
-            ].map(({ label, val, icon: Icon }) => (
-              <div key={label} className="flex flex-col items-center rounded-2xl bg-white/15 px-5 py-3 backdrop-blur-sm min-w-[80px]">
-                <Icon className="h-5 w-5 mb-1 text-white/70" />
-                <span className="text-2xl font-black">{val}</span>
-                <span className="text-[10px] font-semibold text-white/60 uppercase tracking-widest">{label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* hover tip */}
-        <p className="relative mt-5 text-xs text-white/50">
-          💡 Hover on your photo to upload a new profile picture from your device
-        </p>
-      </div>
-
-      {/* ── 4 stat cards ─────────────────────────────────────────────────── */}
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard icon={FolderKanban} label="Active Projects" value={String(activeProjects.length)}
-          sub={`${projects.length} total`} color="bg-gradient-to-br from-indigo-500 to-indigo-700"
-          trend={activeProjects.length > 0 ? "In progress" : undefined} />
-        <StatCard icon={Target} label="Open Tasks" value={String(openTasks.length)}
-          sub={urgentTasks.length > 0 ? `${urgentTasks.length} urgent` : "All on track"}
-          color={urgentTasks.length > 0 ? "bg-gradient-to-br from-red-500 to-rose-700" : "bg-gradient-to-br from-emerald-500 to-teal-700"} />
-        <StatCard icon={DollarSign} label="Outstanding" value={`$${totalDue.toLocaleString()}`}
-          sub={`$${totalPaid.toLocaleString()} paid`} color="bg-gradient-to-br from-amber-500 to-orange-600" />
-        <StatCard icon={Bell} label="Notifications" value={String(unread)}
-          sub="Unread alerts" color="bg-gradient-to-br from-purple-500 to-violet-700"
-          trend={unread > 0 ? `${unread} new` : undefined} />
-      </div>
-
-      {/* ── Projects + Tasks row ──────────────────────────────────────────── */}
-      <div className="grid gap-6 lg:grid-cols-5">
-
-        {/* Projects — 3 cols */}
-        <div className="lg:col-span-3 rounded-3xl border border-border bg-card p-6 shadow-sm">
-          <div className="mb-5 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="grid h-8 w-8 place-items-center rounded-xl bg-indigo-100 text-indigo-600">
-                <FolderKanban className="h-4 w-4" />
-              </div>
-              <h2 className="font-display text-base font-black text-foreground">Project Progress</h2>
-            </div>
-            <Link to="/clients/projects" className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-bold text-foreground hover:bg-muted transition-colors">
-              View all <ArrowRight className="h-3 w-3" />
-            </Link>
-          </div>
-
-          {projects.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-10 text-center">
-              <div className="grid h-14 w-14 place-items-center rounded-2xl bg-muted">
-                <FolderKanban className="h-7 w-7 text-muted-foreground" />
-              </div>
-              <p className="text-sm font-semibold text-muted-foreground">No projects yet</p>
-              <p className="text-xs text-muted-foreground">Your projects will appear here once assigned</p>
-            </div>
-          ) : (
-            <div className="space-y-5">
-              {projects.slice(0, 4).map((p) => {
-                const pct = Math.min(100, Math.max(0, p.progress ?? 0));
-                const ringColor = pct >= 100 ? "#10b981" : pct >= 60 ? "#6366f1" : pct >= 30 ? "#f59e0b" : "#ef4444";
-                return (
-                  <div key={p.id} className="flex items-center gap-4">
-                    <RingProgress pct={pct} size={52} stroke={5} color={ringColor} />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center justify-between gap-2">
-                        <p className="truncate text-sm font-bold text-foreground">{p.title}</p>
-                        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${statusBadge(p.status)}`}>{p.status.replace("_", " ")}</span>
-                      </div>
-                      <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
-                        <div className="h-full rounded-full transition-all duration-700" style={{ width: `${pct}%`, backgroundColor: ringColor }} />
-                      </div>
-                      <div className="mt-1 flex items-center justify-between text-xs text-muted-foreground">
-                        <span>{pct}% complete</span>
-                        {p.due_date && <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" />{new Date(p.due_date).toLocaleDateString()}</span>}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Tasks — 2 cols */}
-        <div className="lg:col-span-2 rounded-3xl border border-border bg-card p-6 shadow-sm">
-          <div className="mb-5 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="grid h-8 w-8 place-items-center rounded-xl bg-emerald-100 text-emerald-600">
-                <ListChecks className="h-4 w-4" />
-              </div>
-              <h2 className="font-display text-base font-black text-foreground">Tasks</h2>
-            </div>
-            <Link to="/clients/tasks" className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-bold text-foreground hover:bg-muted transition-colors">
-              All <ArrowRight className="h-3 w-3" />
-            </Link>
-          </div>
-
-          {/* task summary rings */}
-          <div className="mb-5 grid grid-cols-3 gap-2">
-            {[
-              { label: "Open", count: openTasks.length, color: "#6366f1" },
-              { label: "Urgent", count: urgentTasks.length, color: "#ef4444" },
-              { label: "Done", count: tasks.filter((t) => t.status === "done").length, color: "#10b981" },
-            ].map(({ label, count, color }) => (
-              <div key={label} className="flex flex-col items-center rounded-2xl bg-muted/50 py-3 gap-1">
-                <RingProgress pct={tasks.length ? (count / tasks.length) * 100 : 0} size={40} stroke={4} color={color} />
-                <span className="text-sm font-black text-foreground">{count}</span>
-                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">{label}</span>
-              </div>
-            ))}
-          </div>
-
-          {openTasks.length === 0 ? (
-            <div className="rounded-2xl bg-emerald-50 p-4 text-center">
-              <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-500 mb-1" />
-              <p className="text-sm font-bold text-emerald-700">All clear!</p>
-              <p className="text-xs text-emerald-600">No open tasks right now</p>
-            </div>
-          ) : (
-            <ul className="space-y-2">
-              {openTasks.slice(0, 4).map((t) => (
-                <li key={t.id} className="flex items-center gap-3 rounded-xl border border-border p-3 hover:bg-muted/50 transition-colors">
-                  <div className={`h-2 w-2 shrink-0 rounded-full ${t.priority === "high" ? "bg-red-500" : t.priority === "medium" ? "bg-amber-400" : "bg-emerald-500"}`} />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-xs font-semibold text-foreground">{t.title}</p>
-                    {t.due_date && (
-                      <p className="text-[10px] text-muted-foreground flex items-center gap-1 mt-0.5">
-                        <Clock className="h-2.5 w-2.5" /> Due {new Date(t.due_date).toLocaleDateString()}
+          <div className="space-y-3">
+            {milestones
+              .filter((m) => m.status !== "done")
+              .slice(0, 3)
+              .map((m) => (
+                <div
+                  key={m.id}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#ECEBE8] bg-[#FAFAF8] p-4"
+                >
+                  <div>
+                    <p className="text-sm font-semibold text-[#24262B]">{m.title}</p>
+                    {m.due_date && (
+                      <p className="text-xs text-[#85858D]">
+                        Target Date: {new Date(m.due_date).toLocaleDateString()}
                       </p>
                     )}
                   </div>
-                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase ${t.priority === "high" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>{t.priority}</span>
-                </li>
+                  <button
+                    onClick={() => handleApproveMilestone(m.id)}
+                    disabled={approvingMilestoneId === m.id}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-[#638D79] hover:bg-[#638D79]/90 px-4 py-1.5 text-xs font-semibold text-white shadow-xs"
+                  >
+                    {approvingMilestoneId === m.id ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Check className="h-3.5 w-3.5" />
+                    )}
+                    <span>Sign Off &amp; Approve</span>
+                  </button>
+                </div>
               ))}
-            </ul>
-          )}
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* ── Invoices + Activity + Notifications ──────────────────────────── */}
-      <div className="grid gap-6 lg:grid-cols-3">
-
-        {/* Invoices */}
-        <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
-          <div className="mb-5 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="grid h-8 w-8 place-items-center rounded-xl bg-amber-100 text-amber-600">
-                <ReceiptText className="h-4 w-4" />
-              </div>
-              <h2 className="font-display text-base font-black text-foreground">Billing</h2>
-            </div>
-            <Link to="/clients/billing" className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-bold text-foreground hover:bg-muted transition-colors">
-              All <ArrowRight className="h-3 w-3" />
+      {/* ── INVOICES & RECENT BILLING ── */}
+      {invoices.length > 0 && (
+        <div className="rounded-2xl bg-white p-6 border border-[#ECEBE8] shadow-xs">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="font-heading text-base font-bold text-[#24262B]">Official Invoices</h2>
+            <Link
+              to="/clients/billing"
+              className="rounded-full bg-[#E5F3FA] hover:bg-[#D4EAF5] px-3 py-1 text-xs font-semibold text-[#24262B] transition-colors"
+            >
+              All Invoices
             </Link>
           </div>
-
-          {/* paid vs outstanding bar */}
-          {invoices.length > 0 && (
-            <div className="mb-5 rounded-2xl bg-muted/50 p-4">
-              <div className="flex justify-between text-xs font-semibold text-muted-foreground mb-2">
-                <span>Paid</span><span>Outstanding</span>
+          <div className="divide-y divide-[#ECEBE8]">
+            {invoices.slice(0, 3).map((inv) => (
+              <div key={inv.id} className="py-3 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold text-[#24262B]">Invoice {inv.number}</p>
+                  <p className="text-xs text-[#85858D]">
+                    {new Date(inv.created_at).toLocaleDateString()} · ${Number(inv.total).toLocaleString()}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSelectedInvoice({
+                      id: inv.id,
+                      invoiceNumber: inv.number,
+                      date: new Date(inv.created_at).toLocaleDateString("en-US", {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      }),
+                      dueDate: inv.due_date
+                        ? new Date(inv.due_date).toLocaleDateString("en-US", {
+                            month: "short",
+                            day: "numeric",
+                            year: "numeric",
+                          })
+                        : "Due on Receipt",
+                      status: inv.status as any,
+                      currency: inv.currency || "USD",
+                      client: {
+                        name: client.name,
+                        company: client.company || undefined,
+                        email: client.email,
+                      },
+                      items: [
+                        {
+                          description: inv.notes || "Professional Software & Digital Services",
+                          rate: Number(inv.total),
+                          qty: 1,
+                          amount: Number(inv.total),
+                        },
+                      ],
+                      total: Number(inv.total),
+                      amountPaid: Number(inv.amount_paid || 0),
+                      balanceDue: Math.max(0, Number(inv.total) - Number(inv.amount_paid || 0)),
+                    })
+                  }
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-[#ECEBE8] bg-[#FAFAF8] hover:bg-[#E5F3FA] px-3 py-1.5 text-xs font-medium text-[#24262B] transition-colors"
+                >
+                  <Eye className="h-3.5 w-3.5 text-[#85BBD6]" />
+                  <span>View Pixel Invoice</span>
+                </button>
               </div>
-              <div className="h-3 overflow-hidden rounded-full bg-muted flex">
-                {totalPaid + totalDue > 0 && (
-                  <>
-                    <div className="h-full bg-emerald-500 rounded-l-full transition-all" style={{ width: `${(totalPaid / (totalPaid + totalDue)) * 100}%` }} />
-                    <div className="h-full bg-amber-400 flex-1 rounded-r-full" />
-                  </>
-                )}
-              </div>
-              <div className="flex justify-between mt-2">
-                <span className="text-sm font-black text-emerald-600">${totalPaid.toLocaleString()}</span>
-                <span className="text-sm font-black text-amber-600">${totalDue.toLocaleString()}</span>
-              </div>
-            </div>
-          )}
-
-          {invoices.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-6">No invoices yet</p>
-          ) : (
-            <ul className="space-y-2">
-              {invoices.slice(0, 4).map((inv) => (
-                <li key={inv.id} className="flex items-center justify-between rounded-xl border border-border p-3">
-                  <div>
-                    <p className="text-xs font-bold text-foreground">#{inv.number}</p>
-                    {inv.due_date && <p className="text-[10px] text-muted-foreground mt-0.5">Due {new Date(inv.due_date).toLocaleDateString()}</p>}
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-black text-foreground">{inv.currency} {Number(inv.total).toLocaleString()}</p>
-                    <span className={`text-[10px] font-bold uppercase rounded-full px-2 py-0.5 ${statusBadge(inv.status)}`}>{inv.status}</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        {/* Notifications */}
-        <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
-          <div className="mb-5 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="grid h-8 w-8 place-items-center rounded-xl bg-purple-100 text-purple-600">
-                <Bell className="h-4 w-4" />
-              </div>
-              <h2 className="font-display text-base font-black text-foreground">Notifications</h2>
-              {unread > 0 && (
-                <span className="grid h-5 w-5 place-items-center rounded-full bg-purple-600 text-[10px] font-black text-white">{unread}</span>
-              )}
-            </div>
-            <Link to="/clients/notifications" className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-bold text-foreground hover:bg-muted transition-colors">
-              All <ArrowRight className="h-3 w-3" />
-            </Link>
+            ))}
           </div>
-
-          {notifications.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 py-8 text-center">
-              <Bell className="h-8 w-8 text-muted-foreground/40" />
-              <p className="text-sm text-muted-foreground">No notifications yet</p>
-            </div>
-          ) : (
-            <ul className="space-y-2">
-              {notifications.slice(0, 5).map((n) => (
-                <li key={n.id} className={`rounded-xl p-3 transition-colors ${n.is_read ? "border border-border" : "border border-purple-200 bg-purple-50"}`}>
-                  <div className="flex items-start gap-2">
-                    <div className={`mt-0.5 h-2 w-2 shrink-0 rounded-full ${n.is_read ? "bg-muted-foreground/30" : "bg-purple-500"}`} />
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-foreground leading-snug">{n.title}</p>
-                      {n.body && <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{n.body}</p>}
-                      <p className="text-[10px] text-muted-foreground/60 mt-1">{timeAgo(n.created_at)}</p>
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
         </div>
+      )}
 
-        {/* Activity timeline */}
-        <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
-          <div className="mb-5 flex items-center gap-2">
-            <div className="grid h-8 w-8 place-items-center rounded-xl bg-blue-100 text-blue-600">
-              <Activity className="h-4 w-4" />
-            </div>
-            <h2 className="font-display text-base font-black text-foreground">Activity</h2>
-          </div>
+      {/* ── MODALS ── */}
+      {showProjectModal && (
+        <ProjectRequestModal
+          clientId={client.id}
+          clientName={client.name}
+          onClose={() => setShowProjectModal(false)}
+          onCreated={() => {
+            setShowProjectModal(false);
+            reloadProjects();
+            reloadActivities();
+          }}
+        />
+      )}
 
-          {/* mini bar chart */}
-          <div className="mb-4 rounded-2xl bg-muted/50 p-3">
-            <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground mb-2">Account activity</p>
-            <MiniBar values={taskSparkline} color="bg-blue-500" />
-          </div>
-
-          {activities.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">No activity yet</p>
-          ) : (
-            <ul className="space-y-3 border-l-2 border-dashed border-border pl-4">
-              {activities.slice(0, 6).map((a, i) => (
-                <li key={a.id} className="relative">
-                  <div className="absolute -left-5 top-1 h-3 w-3 rounded-full bg-card border-2 border-blue-400" />
-                  <p className="text-xs font-semibold text-foreground leading-snug">{a.description || a.action.replace(/_/g, " ")}</p>
-                  <p className="text-[10px] text-muted-foreground mt-0.5">{timeAgo(a.created_at)}</p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
-
-      {/* ── Quick links ───────────────────────────────────────────────────── */}
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        {[
-          { to: "/clients/projects", label: "View Projects", desc: "Track progress", icon: FolderKanban, color: "from-indigo-50 to-indigo-100 border-indigo-200 text-indigo-700" },
-          { to: "/clients/billing", label: "View Invoices", desc: "Payments & billing", icon: ReceiptText, color: "from-amber-50 to-amber-100 border-amber-200 text-amber-700" },
-          { to: "/clients/chat", label: "Live Chat", desc: "Talk to your team", icon: BarChart3, color: "from-emerald-50 to-emerald-100 border-emerald-200 text-emerald-700" },
-          { to: "/clients/support", label: "Get Support", desc: "Open a ticket", icon: AlertCircle, color: "from-purple-50 to-purple-100 border-purple-200 text-purple-700" },
-        ].map((item) => (
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          <Link key={item.to} to={item.to as any} className={`flex items-center gap-4 rounded-2xl border bg-gradient-to-br ${item.color} p-4 hover:shadow-md transition-all group`}>
-            <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/60">
-              <item.icon className="h-5 w-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-bold">{item.label}</p>
-              <p className="text-xs opacity-70">{item.desc}</p>
-            </div>
-            <ChevronRight className="h-4 w-4 opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
-          </Link>
-        ))}
-      </div>
-
+      {selectedInvoice && (
+        <InvoiceModal
+          data={selectedInvoice}
+          onClose={() => setSelectedInvoice(null)}
+        />
+      )}
     </div>
   );
 }

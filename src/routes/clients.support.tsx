@@ -20,16 +20,16 @@ interface Ticket { id: string; subject: string; message: string; status: string;
 interface Reply { id: string; ticket_id: string; sender_kind: string; sender_name: string; body: string; created_at: string }
 
 const PRIORITY_COLORS: Record<string, string> = {
-  low: "bg-slate-100 text-slate-600",
-  normal: "bg-blue-100 text-blue-700",
-  high: "bg-amber-100 text-amber-700",
-  urgent: "bg-red-100 text-red-700",
+  low: "bg-[#F8FCFF] text-[#4B6475] border border-[#D8EAF3]",
+  normal: "bg-[#EAF7FF] text-[#12344D] border border-[#BDE7FF]",
+  high: "bg-[#163D5A] text-white",
+  urgent: "bg-[#12344D] text-white",
 };
 const STATUS_INFO: Record<string, { label: string; cls: string; icon: React.ElementType }> = {
-  open: { label: "Open", cls: "bg-blue-100 text-blue-700", icon: Clock },
-  in_progress: { label: "In Progress", cls: "bg-amber-100 text-amber-700", icon: Loader2 },
-  resolved: { label: "Resolved", cls: "bg-emerald-100 text-emerald-700", icon: CheckCircle2 },
-  closed: { label: "Closed", cls: "bg-slate-100 text-slate-600", icon: X },
+  open: { label: "Open", cls: "bg-[#EAF7FF] text-[#12344D] border border-[#BDE7FF]", icon: Clock },
+  in_progress: { label: "In Progress", cls: "bg-[#DDF2FF] text-[#12344D] border border-[#BDE7FF]", icon: Loader2 },
+  resolved: { label: "Resolved", cls: "bg-emerald-50 text-emerald-800 border border-emerald-200", icon: CheckCircle2 },
+  closed: { label: "Closed", cls: "bg-slate-100 text-slate-700 border border-slate-200", icon: X },
 };
 
 function Support({ clientId, clientName }: { clientId: string; clientName: string }) {
@@ -109,9 +109,9 @@ function Support({ clientId, clientName }: { clientId: string; clientName: strin
       {/* stats */}
       <div className="grid gap-3 sm:grid-cols-3 mb-6">
         {[
-          { label: "Total Tickets", val: rows.length, icon: LifeBuoy, color: "bg-indigo-50 border-indigo-200 text-indigo-700" },
-          { label: "Open", val: open, icon: AlertCircle, color: "bg-amber-50 border-amber-200 text-amber-700" },
-          { label: "Resolved", val: resolved, icon: CheckCircle2, color: "bg-emerald-50 border-emerald-200 text-emerald-700" },
+          { label: "Total Tickets", val: rows.length, icon: LifeBuoy, color: "bg-[#EAF7FF] border-[#BDE7FF] text-[#12344D]" },
+          { label: "Open", val: open, icon: AlertCircle, color: "bg-[#DDF2FF] border-[#BDE7FF] text-[#12344D]" },
+          { label: "Resolved", val: resolved, icon: CheckCircle2, color: "bg-emerald-50 border-emerald-200 text-emerald-800" },
         ].map(({ label, val, icon: Icon, color }) => (
           <div key={label} className={`flex items-center gap-4 rounded-2xl border p-4 ${color}`}>
             <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-white/60"><Icon className="h-5 w-5" /></div>
@@ -228,12 +228,12 @@ function Support({ clientId, clientName }: { clientId: string; clientName: strin
                       const isAdmin = r.sender_kind === "admin" || r.sender_kind === "staff";
                       return (
                         <div key={r.id} className={`flex gap-3 ${isAdmin ? "" : "flex-row-reverse"}`}>
-                          <div className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl text-xs font-black ${isAdmin ? "bg-indigo-100 text-indigo-700" : "bg-primary/10 text-primary"}`}>
+                          <div className={`grid h-8 w-8 shrink-0 place-items-center rounded-xl text-xs font-black ${isAdmin ? "bg-[#12344D] text-white" : "bg-primary/10 text-primary"}`}>
                             {isAdmin ? "AM" : "You"}
                           </div>
-                          <div className={`flex-1 rounded-2xl p-4 ${isAdmin ? "rounded-tl-sm bg-indigo-50 border border-indigo-200" : "rounded-tr-sm border border-border bg-card"}`}>
+                          <div className={`flex-1 rounded-2xl p-4 ${isAdmin ? "rounded-tl-sm bg-[#EAF7FF] border border-[#BDE7FF]" : "rounded-tr-sm border border-border bg-card"}`}>
                             <div className="flex items-center justify-between mb-1">
-                              <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{isAdmin ? `${r.sender_name} · AM Enterprises` : "You"}</p>
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-[#12344D]">{isAdmin ? `${r.sender_name} · AM Enterprises` : "You"}</p>
                               <p className="text-[10px] text-muted-foreground">{new Date(r.created_at).toLocaleString()}</p>
                             </div>
                             <p className="text-sm text-foreground whitespace-pre-wrap">{r.body}</p>

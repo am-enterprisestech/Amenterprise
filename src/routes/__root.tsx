@@ -209,11 +209,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         {children}
         <Scripts />
       </body>
@@ -224,7 +224,7 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const isChromeless = pathname.startsWith("/admin") || pathname.startsWith("/auth") || pathname.startsWith("/clients") || pathname.startsWith("/staff") || pathname.startsWith("/portal") || /^\/(dev|seo|gd|smm|pm)-auth/.test(pathname);
+  const isChromeless = pathname.startsWith("/admin") || pathname.startsWith("/auth") || pathname.startsWith("/clients") || pathname.startsWith("/staff") || pathname.startsWith("/portal") || pathname.startsWith("/manager") || /^\/(dev|seo|gd|smm|pm)-auth/.test(pathname);
 
   return (
     <QueryClientProvider client={queryClient}>

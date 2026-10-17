@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Plus, Trash2, Send, Bell, Edit2, Save, X, Upload, DollarSign, CheckCircle2, Clock, AlertCircle, Receipt, ImageIcon } from "lucide-react";
+import { Loader2, Plus, Trash2, Send, Bell, Edit2, Save, X, Upload, DollarSign, CheckCircle2, Clock, AlertCircle, Receipt, ImageIcon, Eye } from "lucide-react";
+import { InvoiceModal } from "@/components/portal/InvoiceModal";
+import { type InvoiceData } from "@/components/portal/InvoiceDocument";
 
 export const input = "w-full rounded-xl border border-espresso/12 bg-sand/40 px-3 py-2.5 text-sm outline-none focus:border-cocoa focus:bg-white";
 export const label = "text-[10px] font-semibold uppercase tracking-widest text-espresso/60";
@@ -251,6 +253,7 @@ export function InvoicesTab({ clientId, clientName }: { clientId: string; client
   const [showForm, setShowForm] = useState(false);
   const [proofUploading, setProofUploading] = useState(false);
   const proofRef = useRef<HTMLInputElement>(null);
+  const [selectedInvoice, setSelectedInvoice] = useState<InvoiceData | null>(null);
 
   const [form, setForm] = useState({
     number: "", currency: "USD", total: "", due_date: "", notes: "", status: "pending",
@@ -459,6 +462,30 @@ export function InvoicesTab({ clientId, clientName }: { clientId: string; client
 
               {/* Actions */}
               <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setSelectedInvoice({
+                      id: inv.id,
+                      number: inv.number,
+                      client_name: clientName,
+                      currency: inv.currency,
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      items: Array.isArray((inv as any).items) ? (inv as any).items : undefined,
+                      subtotal: (inv as any).subtotal,
+                      tax: (inv as any).tax,
+                      total: Number(inv.total),
+                      amount_paid: Number(inv.amount_paid),
+                      status: inv.status,
+                      due_date: inv.due_date,
+                      created_at: inv.created_at,
+                      notes: inv.notes,
+                    })
+                  }
+                  className="inline-flex items-center gap-1 rounded-full border border-primary/40 bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary hover:bg-primary hover:text-white transition-all shadow-xs"
+                >
+                  <Eye className="h-3 w-3" /> View / Print Official Invoice
+                </button>
                 <button onClick={() => { setEditing(isEditing ? null : inv.id); setPayingFor(null); }}
                   className={`inline-flex items-center gap-1 rounded-full border px-3 py-1.5 text-xs font-bold ${isEditing ? "bg-espresso text-white border-espresso" : "border-espresso/20 text-espresso hover:bg-sand"}`}>
                   <Edit2 className="h-3 w-3" /> {isEditing ? "Cancel edit" : "Edit"}
@@ -583,6 +610,13 @@ export function InvoicesTab({ clientId, clientName }: { clientId: string; client
           </div>
         );
       })}
+
+      {selectedInvoice && (
+        <InvoiceModal
+          invoice={selectedInvoice}
+          onClose={() => setSelectedInvoice(null)}
+        />
+      )}
     </div>
   );
 }
